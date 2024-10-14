@@ -12,7 +12,12 @@ function BibleBookSelection() {
         options={Object.keys(BibleBookData)}
         getOptionLabel={(option) => `${BibleBookData[option]?.title} (${option})`}
         value={selectedBook}
-        onChange={(event, newValue) => {setSelectedBook(newValue); setTsvContent('')}}
+        onChange={(event, newValue) => {
+          if (newValue) {
+            setSelectedBook(newValue); 
+            setTsvContent('');
+          }
+        }}
         renderInput={(params) => <TextField {...params} label="Select a Bible Book" variant="outlined" fullWidth />}
         sx={{ marginY: 2 }}
       />
