@@ -38,10 +38,8 @@ const TabDelimitedTable = ({ data, showNotFound }) => {
 };
 
 function ConverterResultsComponent() {
-  const { selectedBranch, selectedBook, convertedTsvRows, convertedErrors, conversionStats, mergeWithBranchTsv, setMergeWithBranchTsv, mergedTsvRows, dcsURL } =
+  const { selectedBranch, selectedBook, convertedTsvRows, convertedErrors, conversionStats, mergeWithBranchTsv, setMergeWithBranchTsv, mergedTsvRows, dcsURL, setShowErrors, showErrors, setShowNotFound, showNotFound } =
     useContext(AppContentContext);
-  const [showNotFound, setShowNotFound] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
 
   const processingDone = conversionStats.done >= conversionStats.total;
 

@@ -32,6 +32,8 @@ export const AppContentProvider = ({ children }) => {
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
   const [processingRows, setProcessingRows] = useState(false);
   const [doConvert, setDoConvert] = useState(false);
+  const [showNotFound, setShowNotFound] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     const handlePaste = (event) => {
@@ -85,6 +87,9 @@ export const AppContentProvider = ({ children }) => {
     setRows([]);
     setProcessingRows(false);
     setDoConvert(false);
+    setMergeWithBranchTsv(false);
+    setShowErrors(false);
+    setShowNotFound(false);
   }, [tsvContent, selectedBook]);
 
   useEffect(() => {
@@ -284,6 +289,10 @@ export const AppContentProvider = ({ children }) => {
         doConvert,
         setDoConvert,
         processingRows,
+        setShowNotFound,
+        showNotFound,
+        setShowErrors,
+        showErrors,
       }}
     >
       {children}
