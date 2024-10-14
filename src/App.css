@@ -1,0 +1,23 @@
+body {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  background-color: rgba(229,231,235, 1) !important;
+}
+
+.MuiBox-root .MuiBox-root, .MuiBox-root .MuiAutocomplete-root, .MuiButtonBase-root {
+  background-color: white !important;
+}
+
+.MuiCheckbox-root {
+  background-color: inherit !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
