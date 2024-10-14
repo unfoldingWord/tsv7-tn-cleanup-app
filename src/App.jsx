@@ -7,18 +7,25 @@ import { AppContentProvider, AppContentContext } from './context/AppContentProvi
 import BranchSelection from './components/BranchSelection';
 import AppHeader from './components/AppHeader';
 import ConverterResultsComponent from './components/ConverterResultsComponent';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme'; // Import the custom theme
 
 function App() {
   return (
-    <AppContentProvider>
-      <AppHeader />
-      <Box sx={{ padding: 2 }}>
-        <BibleBookSelection />
-        <BranchSelection />
-        <TSVUploadWidget />
-        <ConverterResultsComponent />
-      </Box>
-    </AppContentProvider>
+    <ThemeProvider theme={theme}>
+      <AppContentProvider>
+        <CssBaseline />
+
+        <AppHeader />
+        <Box sx={{ padding: 2 }}>
+          <BibleBookSelection />
+          <BranchSelection />
+          <TSVUploadWidget />
+          <ConverterResultsComponent />
+        </Box>
+      </AppContentProvider>
+    </ThemeProvider>
   );
 }
 

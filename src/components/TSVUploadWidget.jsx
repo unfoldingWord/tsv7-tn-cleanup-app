@@ -1,12 +1,12 @@
 import React, { useContext, useRef } from 'react';
-import { Box, Typography, TextField } from '@mui/material';
+import { Box, Typography, TextField, Button } from '@mui/material';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { AppContentContext } from '../context/AppContentProvider';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 function TSVUploadWidget() {
-  const { selectedBook, selectedBranch, tsvContent, setTsvContent, dcsURL } = useContext(AppContentContext);
+  const { selectedBook, selectedBranch, tsvContent, doConvert, setDoConvert, setTsvContent, dcsURL, processingRows } = useContext(AppContentContext);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (event) => {
@@ -119,6 +119,14 @@ function TSVUploadWidget() {
           },
         }}
       />
+      <Button 
+          variant="contained" 
+          color="primary"
+          onClick={() => selectedBook && tsvContent && setDoConvert(true)}
+          disabled={doConvert || !tsvContent || !selectedBook}
+        >
+          Convert
+      </Button>
     </Box>
   );
 }

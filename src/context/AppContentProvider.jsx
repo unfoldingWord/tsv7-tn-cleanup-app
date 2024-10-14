@@ -31,6 +31,7 @@ export const AppContentProvider = ({ children }) => {
   const [mergeWithBranchTsv, setMergeWithBranchTsv] = useState(false);
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
   const [processingRows, setProcessingRows] = useState(false);
+  const [doConvert, setDoConvert] = useState(false);
 
   useEffect(() => {
     const handlePaste = (event) => {
@@ -80,16 +81,19 @@ export const AppContentProvider = ({ children }) => {
     setConvertedTsvRows([]);
     setConvertedErrors([]);
     setMergedTsvRows([]);
-    setConversionStats({ total: rows.length, done: 0, skipped: 0, bad: 0 });
-    if (!tsvContent || !selectedBook || !BibleBookData[selectedBook]) {
-      setRows([]);
-      setConversionStats({ total: 0, done: 0, skipped: 0, bad: 0 });
-    } else {
-      const rows = tsvContent.split("\n").filter((r) => r.trim());
-      setRows(rows);
-      setConversionStats({ total: rows.length, done: 0, skipped: 0, bad: 0 });
-    }
+    setConversionStats({ total: 0, done: 0, skipped: 0, bad: 0 });
+    setRows([]);
+    setProcessingRows(false);
+    setDoConvert(false);
   }, [tsvContent, selectedBook]);
+
+  useEffect(() => {
+    if (doConvert) {
+      const tsvRows = tsvContent.split("\n").filter((r) => r.trim());
+      setRows(tsvRows);
+      setConversionStats({ total: tsvRows.length, done: 0, skipped: 0, bad: 0 });
+    }
+  }, [doConvert])
 
   useEffect(() => {
     const processTsvRow = async () => {
@@ -279,6 +283,9 @@ export const AppContentProvider = ({ children }) => {
         mergeWithBranchTsv,
         setMergeWithBranchTsv,
         mergedTsvRows,
+        doConvert,
+        setDoConvert,
+        processingRows,
       }}
     >
       {children}
