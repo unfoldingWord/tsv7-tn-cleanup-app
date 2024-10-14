@@ -129,7 +129,6 @@ export const AppContentProvider = ({ children }) => {
           continue;
         }
         try {
-          console.log("CALLING TSV7ULTQuotesToOrigLQuotes: ", row);
           const result = await TSV7ULTQuotesToOrigLQuotes(selectedBook, row, dcsURL);
           if (result.output.length) {
             setConvertedTsvRows((prev) => [...prev, ...result.output]);
@@ -144,7 +143,6 @@ export const AppContentProvider = ({ children }) => {
               bad: prev.bad + 1,
             }));
           } else {
-            console.log("WEIRDLY DONE??", row);
             setConversionStats((prev) => ({ ...prev, done: prev.done + 1 }));
           }
        } catch (error) {
