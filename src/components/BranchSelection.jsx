@@ -27,7 +27,9 @@ const BranchSelection = () => {
     <Autocomplete
       value={selectedBranch}
       onChange={(event, newValue) => {
-        setSelectedBranch(newValue);
+        if (newValue) {
+          setSelectedBranch(newValue);
+        }
       }}
       options={branches}
       renderInput={(params) => <TextField {...params} label="Select a Branch" variant="outlined" />}
