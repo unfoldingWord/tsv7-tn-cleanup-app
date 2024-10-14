@@ -7,7 +7,7 @@ const AppHeader = () => {
 
   return (
     <Typography variant="h4" sx={{ backgroundColor: '#38ADDF', color: "#FFF", padding: 1, textAlign: 'center' }}>
-      TSV7 ULT Quotes to OrigL Quotes {server != "PROD" ? `(${server})` : ''}
+      TSV7 ULT to OrigL Quote Converter{server != "PROD" ? ` (${server})` : ''}
     </Typography>
   );
 };
