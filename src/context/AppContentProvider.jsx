@@ -88,7 +88,6 @@ export const AppContentProvider = ({ children }) => {
     setProcessingRows(false);
     setDoConvert(false);
     setMergeWithBranchTsv(false);
-    setShowErrors(false);
     setShowNotFound(false);
   }, [tsvContent, selectedBook]);
 
