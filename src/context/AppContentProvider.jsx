@@ -31,18 +31,18 @@ export const AppContentProvider = ({ children }) => {
 
   const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
+  const [mergedTsvRows, setMergedTsvRows] = useState([]);
   const [rowsSkipped, setRowsSkipped] = useState(0);
   const [rowsFailed, setRowsFailed] = useState(0);
   const [errors, setErrors] = useState([]);
-
-  const [mergeWithDcs, setMergeWithDcs] = useState(false);
-  const [mergedTsvRows, setMergedTsvRows] = useState([]);
 
   const [doConvert, setDoConvert] = useState(false);
   const [processingRows, setProcessingRows] = useState(false);
   const [showNotFound, setShowNotFound] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [doneConverting, setDoneConverting] = useState(false);
+  const [doNotPromptAgain, setDoNotPromptAgain] = useState(false);
+  const [showOnlyConvertedRows, setShowOnlyConvertedRows] = useState(false);
 
   const [existingIDs, setExistingIDs] = useState(new Set());
 
@@ -90,6 +90,7 @@ export const AppContentProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('selectedBranch', selectedBranch);
+    setMergedTsvRows([]);
   }, [selectedBranch]);
 
   useEffect(() => {
@@ -99,11 +100,12 @@ export const AppContentProvider = ({ children }) => {
     setErrors([]);
     setRowsSkipped(0);
     setRowsFailed(0);
-    setMergeWithDcs(false);
+    setShowOnlyConvertedRows(false);
     setShowNotFound(false);
     setProcessingRows(false);
     setDoneConverting(false);
     setExistingIDs(new Set());
+    setDoNotPromptAgain(false);
   }, [selectedBook, inputTsvRows]);
 
   useEffect(() => {
@@ -173,7 +175,17 @@ export const AppContentProvider = ({ children }) => {
 
   useEffect(() => {
     const doMerge = async () => {
-      const response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
+      let response;
+      setDoNotPromptAgain(false);
+      try {
+        response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.statusText}`);
+        }
+      } catch (error) {
+        setErrors((prev) => [...prev, `Error fetching DCS TSV: ${error.message}`]);
+        return;
+      }
       const dcsTsvRows = (await response.text()).split('\n').filter((row) => row.trim());
       const headerRow = `Reference	ID	Tags	SupportReference	Quote	Occurrence	Note`;
       const idToRefMap = new Map();
@@ -251,10 +263,26 @@ export const AppContentProvider = ({ children }) => {
       setMergedTsvRows(mergedRows);
     };
 
-    if (mergeWithDcs && doneConverting && selectedBranch) {
+    if (doneConverting && selectedBranch && ! mergedTsvRows.length) {
       doMerge();
     }
-  }, [mergeWithDcs, convertedTsvRows, dcsURL, selectedBranch, selectedBook]);
+  }, [convertedTsvRows, doneConverting, dcsURL, selectedBranch, selectedBook, mergedTsvRows]);
+
+  useEffect(() => {
+    if (mergedTsvRows.length > 0 && !doNotPromptAgain) {
+      setDoNotPromptAgain(true);
+      const userConfirmed = window.confirm(`Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${selectedBranch == 'master' ? '\n\nNote: Before commiting changes, select the create branch option and change "patch" to "tc-create", e.g.: richmahn-tc-create-1' : ''}\n\nYou will be redirected in this window to DCS if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`);
+      if (userConfirmed) {
+        const mergedContent = mergedTsvRows.join('\n');
+        navigator.clipboard.writeText(mergedContent).then(() => {
+          const dcsEditorUrl = `${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`;
+          window.location.href = dcsEditorUrl;
+        }).catch((err) => {
+          console.error('Failed to copy text to clipboard:', err);
+        });
+      }
+    }
+  }, [mergedTsvRows, selectedBook, dcsURL, selectedBranch]);
 
   return (
     <AppContentContext.Provider
@@ -279,8 +307,8 @@ export const AppContentProvider = ({ children }) => {
         setRowsSkipped,
         rowsFailed,
         setRowsFailed,
-        mergeWithDcs,
-        setMergeWithDcs,
+        showOnlyConvertedRows,
+        setShowOnlyConvertedRows,
         mergedTsvRows,
         setMergedTsvRows,
         showNotFound,

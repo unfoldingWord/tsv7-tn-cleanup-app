@@ -32,7 +32,7 @@ const BranchSelection = () => {
         }
       }}      
       options={branches}
-      renderInput={(params) => <TextField {...params} label="Select a Branch" variant="outlined" />}
+      renderInput={(params) => <TextField {...params} label="Select a TN Branch (for fetching [optional] and merging rows)" variant="outlined" />}
       sx={{ margin: 2, width: "100%" }}
     />
   );
