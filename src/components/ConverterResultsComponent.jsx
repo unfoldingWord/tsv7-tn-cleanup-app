@@ -85,7 +85,8 @@ function ConverterResultsComponent() {
     <>
       {doConvert ? (
         <div>
-          {convertedTsvRows.length} / {inputTsvRows.length} rows processed, {convertedTsvRows.length - rowsSkipped - rowsFailed} quotes converted, {rowsSkipped} skipped (not ULT text), {rowsFailed} not found (error or bad ULT quote)
+          {convertedTsvRows.length} / {inputTsvRows.length} rows processed, {convertedTsvRows.length - rowsSkipped - rowsFailed} quotes converted, {rowsSkipped} skipped (already
+          OrigL or blank), {rowsFailed} not found (error or bad ULT quote)
         </div>
       ) : null}
       {errors.length && doneConverting ? (
