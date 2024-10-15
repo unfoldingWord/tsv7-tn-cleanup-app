@@ -19,8 +19,10 @@ function App() {
 
         <AppHeader />
         <Box sx={{ padding: 2 }}>
-          <BibleBookSelection />
-          <BranchSelection />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <BibleBookSelection />
+            <BranchSelection />
+          </Box>
           <TSVUploadWidget />
           <ConverterResultsComponent />
         </Box>

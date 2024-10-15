@@ -54,6 +54,7 @@ export const AppContentProvider = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const serverParam = urlParams.get('server');
     const book = urlParams.get('book');
+    const branch = urlParams.get('branch');
 
     if (serverParam) {
       setServer(serverParam.toUpperCase());
@@ -66,6 +67,10 @@ export const AppContentProvider = ({ children }) => {
 
     if (book) {
       setSelectedBook(book);
+    }
+
+    if (branch) {
+      setSelectedBranch(branch);
     }
   }, []);
 

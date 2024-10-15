@@ -30,9 +30,10 @@ const BranchSelection = () => {
         if (newValue) {
           setSelectedBranch(newValue);
         }
-      }}
+      }}      
       options={branches}
       renderInput={(params) => <TextField {...params} label="Select a Branch" variant="outlined" />}
+      sx={{ margin: 2, width: "100%" }}
     />
   );
 };
