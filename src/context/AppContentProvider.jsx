@@ -15,6 +15,14 @@ const replaceWithCurlyQuotes = (text) => {
     .replace(/"/g, '”'); // Default to right double quote
 };
 
+const getUniqueID = (ids) => {
+  let newID;
+  do {
+    newID = Math.random().toString(36).substring(2, 6);
+  } while (ids.has(newID));
+  return newID;
+}
+
 export const AppContentProvider = ({ children }) => {
   const [server, setServer] = useState(localStorage.getItem('server') || 'PROD');
   const [selectedBook, setSelectedBook] = useState(localStorage.getItem('selectedBook') || 'gen');
@@ -36,19 +44,21 @@ export const AppContentProvider = ({ children }) => {
   const [showErrors, setShowErrors] = useState(false);
   const [doneConverting, setDoneConverting] = useState(false);
 
-  useEffect(() => {
-    const handlePaste = (event) => {
-      event.preventDefault();
-      const pastedText = event.clipboardData.getData('text');
-      setInputTsvRows(pastedText.split('\n').filter((row) => row.trim()));
-    };
+  const [existingIDs, setExistingIDs] = useState(new Set());
 
-    document.addEventListener('paste', handlePaste);
+  // useEffect(() => {
+  //   const handlePaste = (event) => {
+  //     event.preventDefault();
+  //     const pastedText = event.clipboardData.getData('text');
+  //     setInputTsvRows(pastedText.split('\n').filter((row) => row.trim()));
+  //   };
 
-    return () => {
-      document.removeEventListener('paste', handlePaste);
-    };
-  }, [inputTsvRows]);
+  //   document.addEventListener('paste', handlePaste);
+
+  //   return () => {
+  //     document.removeEventListener('paste', handlePaste);
+  //   };
+  // }, [inputTsvRows]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -93,6 +103,7 @@ export const AppContentProvider = ({ children }) => {
     setShowNotFound(false);
     setProcessingRows(false);
     setDoneConverting(false);
+    setExistingIDs(new Set());
   }, [selectedBook, inputTsvRows]);
 
   useEffect(() => {
@@ -110,11 +121,19 @@ export const AppContentProvider = ({ children }) => {
           setRowsFailed((prev) => prev + 1);
           continue;
         }
-        
+
+        if (existingIDs.has(columns[1])) {
+          columns[1] = getUniqueID(existingIDs);          
+        }
+        existingIDs.add(columns[1]);
+        setExistingIDs((prev) => new Set(prev).add(columns[1]));
+
         const newNote = replaceWithCurlyQuotes(columns[6]);
         if (newNote != columns[6]) {
-          row = columns.slice(0, 6).concat(newNote).join('\t');
+          columns[6] = newNote;
         }
+
+        row = columns.join("\t");
 
         if (columns[0] === 'Reference' || !/[a-zA-Z]/.test(columns[4].replace(/(\\n|<br>)/g, ''))) {
           setConvertedTsvRows((prev) => [...prev, row]);
@@ -172,26 +191,26 @@ export const AppContentProvider = ({ children }) => {
         idToRefMap.set(id, ref);
       });
 
-      const convertedRefs = [];
+      const convertedRefs = new Set();;
+      const convertedTsvIDs = new Set();
       convertedTsvRows.forEach((row) => {
         const columns = row.split('\t');
         if (columns.length < 2 || columns[0] === 'Reference') return;
-        const [ref, id] = columns;
+        let [ref, id] = columns;
         if (ref === 'Reference') return;
-        if (!convertedRefs.includes(ref)) {
+        if (!convertedRefs.has(ref)) {
           allTsvMap.set(ref, []);
-          convertedRefs.push(ref);
+          convertedRefs.add(ref);
         }
-        if (!idToRefMap.has(id) || idToRefMap.get(id) == ref) {
+        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && ! convertedTsvIDs.has(id)) {
           allTsvMap.get(ref).push(row);
         } else {
-          let newId;
-          do {
-            newId = Math.random().toString(36).substring(2, 6);
-          } while (idToRefMap.has(newId));
-          const newRow = [ref, newId, ...columns.slice(2)].join('\t');
+          const ids = new Set([...idToRefMap.keys(), ...convertedTsvIDs]);
+          id = getUniqueID(ids);
+          const newRow = [ref, id, ...columns.slice(2)].join('\t');
           allTsvMap.get(ref).push(newRow);
         }
+        convertedTsvIDs.add(id);
       });
 
       const allReferences = Array.from(allTsvMap.keys()).sort((a, b) => {

@@ -61,12 +61,12 @@ function TSVUploadWidget() {
             color: 'blue',
             textDecoration: 'none',
             cursor: 'pointer',
+            paddingRight: "10px",
           }}
         >
           <ContentPasteIcon sx={{ marginRight: 0.5 }} />          
           Paste text
         </Box>
-        {' '}, {' '}
       <Box
         component="span"
         onClick={handleUploadClick}
@@ -74,12 +74,13 @@ function TSVUploadWidget() {
           color: 'blue',
           textDecoration: 'none',
           cursor: 'pointer',
+          paddingRight: "10px",
         }}
       >
           <UploadFileIcon sx={{ marginRight: 0.5 }} />          
           Upload a TSV file
-      </Box>{' '}
-      or{' '}
+      </Box>
+      {' '}or{' '}
       <Box
         component="span"
         onClick={handleFetchFromDcsClick}
@@ -87,12 +88,12 @@ function TSVUploadWidget() {
           color: 'blue',
           textDecoration: 'none',
           cursor: 'pointer',
+          paddingLeft: "10px",
         }}
       >
           <CloudDownloadIcon sx={{ marginRight: 0.5 }} />          
           Fetch en_ult / tn_{selectedBook.toUpperCase()}.tsv ({selectedBranch}) from DCS
-      </Box>{' '}
-      for the Translation Notes TSV content
+      </Box>
     </Typography>
     <input
         type="file"
