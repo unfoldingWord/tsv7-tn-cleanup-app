@@ -92,7 +92,7 @@ function TSVUploadWidget() {
         }}
       >
           <CloudDownloadIcon sx={{ marginRight: 0.5 }} />          
-          Fetch en_ult / tn_{selectedBook.toUpperCase()}.tsv ({selectedBranch}) from DCS
+          Fetch en_tn / tn_{selectedBook.toUpperCase()}.tsv ({selectedBranch}) from DCS
       </Box>
     </Typography>
     <input
