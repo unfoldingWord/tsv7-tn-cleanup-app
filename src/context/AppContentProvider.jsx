@@ -1,23 +1,25 @@
-import React, { createContext, useState, useEffect } from "react";
-import TSV7ULTQuotesToOrigLQuotes from "tsv7-ult-quotes-to-origl-quotes";
-import { BibleBookData } from "../common/books";
-import Papa from "papaparse";
+import React, { createContext, useState, useEffect } from 'react';
+import TSV7ULTQuotesToOrigLQuotes from 'tsv7-ult-quotes-to-origl-quotes';
+import { BibleBookData } from '../common/books';
+import Papa from 'papaparse';
 
 export const AppContentContext = createContext();
 
+const replaceWithCurlyQuotes = (text) => {
+  return text
+    .replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
+    .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's'
+    .replace(/'/g, '‘') // Left single quote
+    .replace(/(\W|^)"(\S)/g, '$1“$2') // Left double quote
+    .replace(/(\S)"(\W|$)/g, '$1”$2') // Right double quote
+    .replace(/"/g, '”'); // Default to right double quote
+};
+
 export const AppContentProvider = ({ children }) => {
-  const [server, setServer] = useState(
-    localStorage.getItem("server") || "PROD"
-  );
-  const [selectedBook, setSelectedBook] = useState(
-    localStorage.getItem("selectedBook") || "gen"
-  );
-  const [dcsURL, setDcsURL] = useState(
-    localStorage.getItem("dcsURL") || "https://git.door43.org"
-  );
-  const [selectedBranch, setSelectedBranch] = useState(
-    localStorage.getItem("selectedBranch") || "master"
-  );
+  const [server, setServer] = useState(localStorage.getItem('server') || 'PROD');
+  const [selectedBook, setSelectedBook] = useState(localStorage.getItem('selectedBook') || 'gen');
+  const [dcsURL, setDcsURL] = useState(localStorage.getItem('dcsURL') || 'https://git.door43.org');
+  const [selectedBranch, setSelectedBranch] = useState(localStorage.getItem('selectedBranch') || 'master');
 
   const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
@@ -37,32 +39,29 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const handlePaste = (event) => {
       event.preventDefault();
-      const pastedText = event.clipboardData.getData("text");
-      setInputTsvRows(pastedText.split("\n").filter(row => row.trim()));
+      const pastedText = event.clipboardData.getData('text');
+      setInputTsvRows(pastedText.split('\n').filter((row) => row.trim()));
     };
 
-    document.addEventListener("paste", handlePaste);
+    document.addEventListener('paste', handlePaste);
 
     return () => {
-      document.removeEventListener("paste", handlePaste);
+      document.removeEventListener('paste', handlePaste);
     };
   }, [inputTsvRows]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const serverParam = urlParams.get("server");
-    const book = urlParams.get("book");
+    const serverParam = urlParams.get('server');
+    const book = urlParams.get('book');
 
     if (serverParam) {
       setServer(serverParam.toUpperCase());
-      localStorage.setItem("server", serverParam.toUpperCase());
+      localStorage.setItem('server', serverParam.toUpperCase());
 
-      const newDcsURL =
-        serverParam.toUpperCase() === "QA"
-          ? "https://qa.door43.org"
-          : "https://git.door43.org";
+      const newDcsURL = serverParam.toUpperCase() === 'QA' ? 'https://qa.door43.org' : 'https://git.door43.org';
       setDcsURL(newDcsURL);
-      localStorage.setItem("dcsURL", newDcsURL);
+      localStorage.setItem('dcsURL', newDcsURL);
     }
 
     if (book) {
@@ -71,16 +70,16 @@ export const AppContentProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("selectedBook", selectedBook);
+    localStorage.setItem('selectedBook', selectedBook);
   }, [selectedBook]);
 
   useEffect(() => {
-    localStorage.setItem("selectedBranch", selectedBranch);
+    localStorage.setItem('selectedBranch', selectedBranch);
   }, [selectedBranch]);
 
   useEffect(() => {
     setDoConvert(false);
-    setConvertedTsvRows([])
+    setConvertedTsvRows([]);
     setMergedTsvRows([]);
     setErrors([]);
     setRowsSkipped(0);
@@ -98,18 +97,21 @@ export const AppContentProvider = ({ children }) => {
       while (rowIdx < inputTsvRows.length) {
         let row = inputTsvRows[rowIdx++];
 
-        const columns = row.split("\t");
+        const columns = row.split('\t');
 
         if (columns.length != 7) {
           setConvertedTsvRows((prev) => [...prev, row]);
-          setErrors((prev) => [
-            ...prev,
-            `Error: Row #${convertedTsvRows.length + 1} is malformed: ${row}`,
-          ]);
-          setRowsFailed((prev) => prev + 1)
+          setErrors((prev) => [...prev, `Error: Row #${convertedTsvRows.length + 1} is malformed: ${row}`]);
+          setRowsFailed((prev) => prev + 1);
           continue;
         }
-        if (columns[0] === "Reference" || !/[a-zA-Z]/.test(columns[4].replace(/(\\n|<br>)/g, ""))) {
+        
+        const newNote = replaceWithCurlyQuotes(columns[6]);
+        if (newNote != columns[6]) {
+          row = columns.slice(0, 6).concat(newNote).join('\t');
+        }
+
+        if (columns[0] === 'Reference' || !/[a-zA-Z]/.test(columns[4].replace(/(\\n|<br>)/g, ''))) {
           setConvertedTsvRows((prev) => [...prev, row]);
           setRowsSkipped((prev) => prev + 1);
           continue;
@@ -123,15 +125,12 @@ export const AppContentProvider = ({ children }) => {
           }
           if (result.errors.length || result.output?.[0]?.includes('QUOTE_NOT_FOUND: ')) {
             setErrors((prev) => [...prev, ...result.errors]);
-            setRowsFailed((prev) => prev + 1)
+            setRowsFailed((prev) => prev + 1);
           }
-       } catch (error) {
+        } catch (error) {
           setConvertedTsvRows((prev) => [...prev, row]);
-          setRowsFailed((prev) => prev + 1)
-          setErrors((prev) => [
-            ...prev,
-            `Error processing row #${convertedTsvRows.length + 1}: ${error}`,
-          ]);
+          setRowsFailed((prev) => prev + 1);
+          setErrors((prev) => [...prev, `Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
           console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
         }
         break; // We're returning so components can be updated with the progress stats. This will be triggered again.
@@ -151,41 +150,56 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const doMerge = async () => {
       const response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
-      const dcsTsvRows = (await response.text()).split("\n").filter(row => row.trim());
-      const headerRow = `Reference	ID	Tags	SupportReference	Quote	Occurrence	Note`
+      const dcsTsvRows = (await response.text()).split('\n').filter((row) => row.trim());
+      const headerRow = `Reference	ID	Tags	SupportReference	Quote	Occurrence	Note`;
+      const idToRefMap = new Map();
 
       const allTsvMap = new Map();
       dcsTsvRows.forEach((row) => {
-        const ref = row.split("\t")[0]
-        if (ref === "Reference") return;
+        const columns = row.split('\t');
+        if (columns.length < 2 || columns[0] === 'Reference') return;
+        const [ref, id] = columns;
+        if (ref === 'Reference') return;
         if (!allTsvMap.has(ref)) {
           allTsvMap.set(ref, []);
         }
         allTsvMap.get(ref).push(row);
+        idToRefMap.set(id, ref);
       });
-      
+
       const convertedRefs = [];
       convertedTsvRows.forEach((row) => {
-        const ref = row.split("\t")[0]
-        if (ref === "Reference") return;
-        if(! convertedRefs.includes(ref)) {
-          allTsvMap.set(ref, [])
-          convertedRefs.push(ref)
+        const columns = row.split('\t');
+        if (columns.length < 2 || columns[0] === 'Reference') return;
+        const [ref, id] = columns;
+        if (ref === 'Reference') return;
+        if (!convertedRefs.includes(ref)) {
+          allTsvMap.set(ref, []);
+          convertedRefs.push(ref);
         }
-        allTsvMap.get(ref).push(row);
+        if (!idToRefMap.has(id) || idToRefMap.get(id) == ref) {
+          allTsvMap.get(ref).push(row);
+        } else {
+          let newId;
+          do {
+            newId = Math.random().toString(36).substring(2, 6);
+          } while (idToRefMap.has(newId));
+          const newRow = [ref, newId, ...columns.slice(2)].join('\t');
+          allTsvMap.get(ref).push(newRow);
+        }
       });
 
       const allReferences = Array.from(allTsvMap.keys()).sort((a, b) => {
         const parseReference = (ref) => {
-          const [chap, verse] = ref.split(":");
+          const [chap, verse] = ref.split(':');
           const chapNum = isNaN(chap) ? chap : Number(chap);
           const verseNum = isNaN(verse) ? verse : Number(verse);
           return [chapNum, verseNum];
         };
-      
+
         const [aChap, aVerse] = parseReference(a);
         const [bChap, bVerse] = parseReference(b);
-      
+
         if (aChap === bChap) {
           if (typeof aVerse === 'string' && typeof bVerse === 'string') {
             return aVerse.localeCompare(bVerse);
@@ -194,7 +208,7 @@ export const AppContentProvider = ({ children }) => {
           if (typeof bVerse === 'string') return 1;
           return aVerse - bVerse;
         }
-      
+
         if (typeof aChap === 'string' && typeof bChap === 'string') {
           return aChap.localeCompare(bChap);
         }
@@ -203,10 +217,10 @@ export const AppContentProvider = ({ children }) => {
         return aChap - bChap;
       });
 
-      const mergedRows = [headerRow]
+      const mergedRows = [headerRow];
       allReferences.forEach((ref) => {
-        allTsvMap.get(ref).forEach(row => {
-          mergedRows.push(row)
+        allTsvMap.get(ref).forEach((row) => {
+          mergedRows.push(row);
         });
       });
 
@@ -216,7 +230,7 @@ export const AppContentProvider = ({ children }) => {
     if (mergeWithDcs && doneConverting && selectedBranch) {
       doMerge();
     }
-  }, [mergeWithDcs, convertedTsvRows, dcsURL, selectedBranch, selectedBook])
+  }, [mergeWithDcs, convertedTsvRows, dcsURL, selectedBranch, selectedBook]);
 
   return (
     <AppContentContext.Provider

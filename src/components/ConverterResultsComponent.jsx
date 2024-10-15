@@ -13,7 +13,7 @@ const HighlightedCell = styled('td')(({ theme, highlight }) => ({
 const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
   const containsHebrewOrGreek = (text) => /[\u0590-\u05FF\u0370-\u03FF]/.test(text);
 
-  const inputIds = inputTsvRows.map(row => row.split("\t")[1]).filter(id => id != "ID");
+  const inputRefs = inputTsvRows.map(row => row.split("\t")[0]).filter(id => id != "Reference");
 
   return (
     <Box sx={{ overflowX: 'auto', whiteSpace: 'pre', border: '1px solid #ccc', padding: '8px', borderRadius: '4px', maxHeight: '500px' }}>
@@ -27,7 +27,7 @@ const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
                 <HighlightedCell
                   key={cellIndex}
                   highlight={
-                    !inputTsvRows.includes(row) && inputIds.includes(row.split("\t")[1])
+                    !inputTsvRows.includes(row) && inputRefs.includes(row.split("\t")[0])
                       ? cellIndex === 4
                         ? containsHebrewOrGreek(cell)
                           ? 'hebrewOrGreek'
