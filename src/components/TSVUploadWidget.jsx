@@ -123,7 +123,11 @@ function TSVUploadWidget() {
       <Button 
           variant="contained" 
           color="primary"
-          onClick={() => selectedBook && inputTsvRows.length && setDoConvert(true)}
+          onClick={() => {
+            if(selectedBook && inputTsvRows.length) {
+              setDoConvert(true);
+            }
+          }}
           disabled={doConvert || !inputTsvRows.length || !selectedBook}
           style={{marginTop: '5px'}}
         >

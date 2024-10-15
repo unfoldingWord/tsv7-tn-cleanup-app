@@ -43,6 +43,7 @@ export const AppContentProvider = ({ children }) => {
   const [doneConverting, setDoneConverting] = useState(false);
   const [doNotPromptAgain, setDoNotPromptAgain] = useState(false);
   const [showOnlyConvertedRows, setShowOnlyConvertedRows] = useState(false);
+  const [lastProcessedRowIndex, setLastProcessedRowIndex] = useState(0);
 
   const [existingIDs, setExistingIDs] = useState(new Set());
 
@@ -106,11 +107,12 @@ export const AppContentProvider = ({ children }) => {
     setDoneConverting(false);
     setExistingIDs(new Set());
     setDoNotPromptAgain(false);
+    setLastProcessedRowIndex(0);
   }, [selectedBook, inputTsvRows]);
 
   useEffect(() => {
     const processTsvRow = async () => {
-      let rowIdx = convertedTsvRows.length;
+      let rowIdx = lastProcessedRowIndex;
 
       while (rowIdx < inputTsvRows.length) {
         let row = inputTsvRows[rowIdx++];
@@ -161,6 +163,7 @@ export const AppContentProvider = ({ children }) => {
         }
         break; // We're returning so components can be updated with the progress stats. This will be triggered again.
       }
+      setLastProcessedRowIndex(rowIdx);
       setProcessingRows(false);
       if (rowIdx >= inputTsvRows.length) {
         setDoneConverting(true);
@@ -171,7 +174,7 @@ export const AppContentProvider = ({ children }) => {
       setProcessingRows(true);
       processTsvRow();
     }
-  }, [doConvert, convertedTsvRows, processingRows, doneConverting]);
+  }, [doConvert, convertedTsvRows, processingRows, doneConverting, lastProcessedRowIndex]);
 
   useEffect(() => {
     const doMerge = async () => {
