@@ -11,22 +11,23 @@ const HighlightedCell = styled('td')(({ theme, highlight }) => ({
 }));
 
 const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
-  const rows = tsvRows.filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND'));
-
   const containsHebrewOrGreek = (text) => /[\u0590-\u05FF\u0370-\u03FF]/.test(text);
+
+  const inputIds = inputTsvRows.map(row => row.split("\t")[1]).filter(id => id != "ID");
 
   return (
     <Box sx={{ overflowX: 'auto', whiteSpace: 'pre', border: '1px solid #ccc', padding: '8px', borderRadius: '4px', maxHeight: '500px' }}>
       <table>
         <tbody>
-          {rows.map((row, rowIndex) => (
+          {tsvRows.map((row, rowIndex) => (
+            !showNotFound || row.includes('QUOTE_NOT_FOUND') ?
             <tr key={rowIndex}>
               <td style={{ width: 1, color: 'grey', fontSize: '0.8em' }}>{rowIndex + 1}</td>
               {row.split('\t').map((cell, cellIndex) => (
                 <HighlightedCell
                   key={cellIndex}
                   highlight={
-                    !inputTsvRows.includes(row)
+                    !inputTsvRows.includes(row) && inputIds.includes(row.split("\t")[1])
                       ? cellIndex === 4
                         ? containsHebrewOrGreek(cell)
                           ? 'hebrewOrGreek'
@@ -40,8 +41,7 @@ const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
                   {cell}
                 </HighlightedCell>
               ))}
-            </tr>
-          ))}
+            </tr>: null))}
         </tbody>
       </table>
     </Box>
