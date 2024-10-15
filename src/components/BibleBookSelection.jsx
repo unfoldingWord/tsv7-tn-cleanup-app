@@ -4,7 +4,7 @@ import { AppContentContext } from '../context/AppContentProvider';
 import { BibleBookData } from '../common/books';
 
 function BibleBookSelection() {
-  const { selectedBook, setSelectedBook, setTsvContent } = useContext(AppContentContext);
+  const { selectedBook, setSelectedBook } = useContext(AppContentContext);
 
   return (
     <Box sx={{ marginY: 2 }}>
@@ -15,7 +15,6 @@ function BibleBookSelection() {
         onChange={(event, newValue) => {
           if (newValue) {
             setSelectedBook(newValue); 
-            setTsvContent('');
           }
         }}
         renderInput={(params) => <TextField {...params} label="Select a Bible Book" variant="outlined" fullWidth />}

@@ -6,12 +6,11 @@ import Papa from "papaparse";
 export const AppContentContext = createContext();
 
 export const AppContentProvider = ({ children }) => {
-  const [tsvContent, setTsvContent] = useState("");
-  const [selectedBook, setSelectedBook] = useState(
-    localStorage.getItem("selectedBook") || "gen"
-  );
   const [server, setServer] = useState(
     localStorage.getItem("server") || "PROD"
+  );
+  const [selectedBook, setSelectedBook] = useState(
+    localStorage.getItem("selectedBook") || "gen"
   );
   const [dcsURL, setDcsURL] = useState(
     localStorage.getItem("dcsURL") || "https://git.door43.org"
@@ -19,27 +18,27 @@ export const AppContentProvider = ({ children }) => {
   const [selectedBranch, setSelectedBranch] = useState(
     localStorage.getItem("selectedBranch") || "master"
   );
-  const [conversionStats, setConversionStats] = useState({
-    total: 0,
-    done: 0,
-    skipped: 0,
-    bad: 0,
-  });
-  const [rows, setRows] = useState([]);
+
+  const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
-  const [convertedErrors, setConvertedErrors] = useState([]);
-  const [mergeWithBranchTsv, setMergeWithBranchTsv] = useState(false);
+  const [rowsSkipped, setRowsSkipped] = useState(0);
+  const [rowsFailed, setRowsFailed] = useState(0);
+  const [errors, setErrors] = useState([]);
+
+  const [mergeWithDcs, setMergeWithDcs] = useState(false);
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
-  const [processingRows, setProcessingRows] = useState(false);
+
   const [doConvert, setDoConvert] = useState(false);
+  const [processingRows, setProcessingRows] = useState(false);
   const [showNotFound, setShowNotFound] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [doneConverting, setDoneConverting] = useState(false);
 
   useEffect(() => {
     const handlePaste = (event) => {
       event.preventDefault();
       const pastedText = event.clipboardData.getData("text");
-      setTsvContent(pastedText);
+      setInputTsvRows(pastedText.split("\n").filter(row => row.trim()));
     };
 
     document.addEventListener("paste", handlePaste);
@@ -47,7 +46,7 @@ export const AppContentProvider = ({ children }) => {
     return () => {
       document.removeEventListener("paste", handlePaste);
     };
-  }, [setTsvContent]);
+  }, [inputTsvRows]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -80,56 +79,39 @@ export const AppContentProvider = ({ children }) => {
   }, [selectedBranch]);
 
   useEffect(() => {
-    setConvertedTsvRows([]);
-    setConvertedErrors([]);
-    setMergedTsvRows([]);
-    setConversionStats({ total: 0, done: 0, skipped: 0, bad: 0 });
-    setRows([]);
-    setProcessingRows(false);
     setDoConvert(false);
-    setMergeWithBranchTsv(false);
+    setConvertedTsvRows([])
+    setMergedTsvRows([]);
+    setErrors([]);
+    setRowsSkipped(0);
+    setRowsFailed(0);
+    setMergeWithDcs(false);
     setShowNotFound(false);
-  }, [tsvContent, selectedBook]);
-
-  useEffect(() => {
-    if (doConvert) {
-      const tsvRows = tsvContent.split("\n").filter((r) => r.trim());
-      setRows(tsvRows);
-      setConversionStats({ total: tsvRows.length, done: 0, skipped: 0, bad: 0 });
-    }
-  }, [doConvert])
+    setProcessingRows(false);
+    setDoneConverting(false);
+  }, [selectedBook, inputTsvRows]);
 
   useEffect(() => {
     const processTsvRow = async () => {
-      if (convertedTsvRows.length >= rows.length) return;
-
       let rowIdx = convertedTsvRows.length;
 
-      while (rowIdx < rows.length) {
-        let row = rows[rowIdx++];
+      while (rowIdx < inputTsvRows.length) {
+        let row = inputTsvRows[rowIdx++];
 
         const columns = row.split("\t");
 
         if (columns.length != 7) {
           setConvertedTsvRows((prev) => [...prev, row]);
-          setConvertedErrors((prev) => [
+          setErrors((prev) => [
             ...prev,
             `Error: Row #${convertedTsvRows.length + 1} is malformed: ${row}`,
           ]);
-          setConversionStats((prev) => ({
-            ...prev,
-            done: prev.done + 1,
-            bad: prev.bad + 1,
-          }));
+          setRowsFailed((prev) => prev + 1)
           continue;
         }
         if (columns[0] === "Reference" || !/[a-zA-Z]/.test(columns[4].replace(/(\\n|<br>)/g, ""))) {
           setConvertedTsvRows((prev) => [...prev, row]);
-          setConversionStats((prev) => ({
-            ...prev,
-            done: prev.done + 1,
-            skipped: prev.skipped + 1,
-          }));
+          setRowsSkipped((prev) => prev + 1);
           continue;
         }
         try {
@@ -140,23 +122,13 @@ export const AppContentProvider = ({ children }) => {
             setConvertedTsvRows((prev) => [...prev, row]);
           }
           if (result.errors.length || result.output?.[0]?.includes('QUOTE_NOT_FOUND: ')) {
-            setConvertedErrors((prev) => [...prev, ...result.errors]);
-            setConversionStats((prev) => ({
-              ...prev,
-              done: prev.done + 1,
-              bad: prev.bad + 1,
-            }));
-          } else {
-            setConversionStats((prev) => ({ ...prev, done: prev.done + 1 }));
+            setErrors((prev) => [...prev, ...result.errors]);
+            setRowsFailed((prev) => prev + 1)
           }
        } catch (error) {
-          setConvertedTsvRows((prev) => [...prev, ...row]);
-          setConversionStats((prev) => ({
-            ...prev,
-            done: prev.done + 1,
-            bad: prev.bad + 1,
-          }));
-          setConvertedErrors((prev) => [
+          setConvertedTsvRows((prev) => [...prev, row]);
+          setRowsFailed((prev) => prev + 1)
+          setErrors((prev) => [
             ...prev,
             `Error processing row #${convertedTsvRows.length + 1}: ${error}`,
           ]);
@@ -165,52 +137,42 @@ export const AppContentProvider = ({ children }) => {
         break; // We're returning so components can be updated with the progress stats. This will be triggered again.
       }
       setProcessingRows(false);
+      if (rowIdx >= inputTsvRows.length) {
+        setDoneConverting(true);
+      }
     };
 
-    if (!processingRows && rows.length > convertedTsvRows.length) {
+    if (doConvert && !processingRows && !doneConverting && inputTsvRows.length > convertedTsvRows.length) {
       setProcessingRows(true);
       processTsvRow();
     }
-  }, [rows, convertedTsvRows.length], processingRows);
+  }, [doConvert, convertedTsvRows, processingRows, doneConverting]);
 
   useEffect(() => {
     const doMerge = async () => {
       const response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
-      const dcsTsv = await response.text();
+      const dcsTsvRows = (await response.text()).split("\n").filter(row => row.trim());
       const headerRow = `Reference	ID	Tags	SupportReference	Quote	Occurrence	Note`
 
-      let rowsWithHeader = convertedTsvRows;
-      if (rowsWithHeader[0] != headerRow) {
-        rowsWithHeader = [headerRow, ...convertedTsvRows];
-      }
-
-      const parsedConvertedTsv = Papa.parse(rowsWithHeader.join("\n"), {
-        delimiter: "\t",
-        header: true,
-        skipEmptyLines: true,
-      });
-
-      const parsedDcsTsv = Papa.parse(dcsTsv, {
-        delimiter: "\t",
-        header: true,
-        skipEmptyLines: true,
-      });
-
       const allTsvMap = new Map();
-      parsedDcsTsv.data.forEach((row) => {
-        if (!allTsvMap.has(row.Reference)) {
-          allTsvMap.set(row.Reference, []);
+      dcsTsvRows.forEach((row) => {
+        const ref = row.split("\t")[0]
+        if (ref === "Reference") return;
+        if (!allTsvMap.has(ref)) {
+          allTsvMap.set(ref, []);
         }
-        allTsvMap.get(row.Reference).push(row);
+        allTsvMap.get(ref).push(row);
       });
       
       const convertedRefs = [];
-      parsedConvertedTsv.data.forEach((row) => {
-        if(! convertedRefs.includes(row.Reference)) {
-          allTsvMap.set(row.Reference, [])
-          convertedRefs.push(row.Reference)
+      convertedTsvRows.forEach((row) => {
+        const ref = row.split("\t")[0]
+        if (ref === "Reference") return;
+        if(! convertedRefs.includes(ref)) {
+          allTsvMap.set(ref, [])
+          convertedRefs.push(ref)
         }
-        allTsvMap.get(row.Reference).push(row);
+        allTsvMap.get(ref).push(row);
       });
 
       const allReferences = Array.from(allTsvMap.keys()).sort((a, b) => {
@@ -241,57 +203,54 @@ export const AppContentProvider = ({ children }) => {
         return aChap - bChap;
       });
 
-      let mergedTsvObjs = []
+      const mergedRows = [headerRow]
       allReferences.forEach((ref) => {
-        mergedTsvObjs = [...mergedTsvObjs, ...allTsvMap.get(ref)];
+        allTsvMap.get(ref).forEach(row => {
+          mergedRows.push(row)
+        });
       });
 
-      const mergedRows = mergedTsvObjs.map(obj => {
-        return [
-          obj.Reference,
-          obj.ID,
-          obj.Tags,
-          obj.SupportReference,
-          obj.Quote,
-          obj.Occurrence,
-          obj.Note
-        ].join("\t");
-      })
-      mergedRows.unshift(headerRow);
       setMergedTsvRows(mergedRows);
     };
 
-    if (mergeWithBranchTsv && selectedBranch && convertedTsvRows.length && convertedTsvRows.length >= rows.length) {
+    if (mergeWithDcs && doneConverting && selectedBranch) {
       doMerge();
-    } else {
-      setMergedTsvRows([]);
     }
-  }, [mergeWithBranchTsv, convertedTsvRows, rows, selectedBranch, selectedBook])
+  }, [mergeWithDcs, convertedTsvRows, dcsURL, selectedBranch, selectedBook])
 
   return (
     <AppContentContext.Provider
       value={{
-        tsvContent,
-        setTsvContent,
-        selectedBook,
-        setSelectedBook,
         server,
         dcsURL,
+        selectedBook,
+        setSelectedBook,
         selectedBranch,
         setSelectedBranch,
-        conversionStats,
+        inputTsvRows,
+        setInputTsvRows,
         convertedTsvRows,
-        convertedErrors,
-        mergeWithBranchTsv,
-        setMergeWithBranchTsv,
-        mergedTsvRows,
+        setConvertedTsvRows,
         doConvert,
         setDoConvert,
         processingRows,
-        setShowNotFound,
+        setProcessingRows,
+        errors,
+        setErrors,
+        rowsSkipped,
+        setRowsSkipped,
+        rowsFailed,
+        setRowsFailed,
+        mergeWithDcs,
+        setMergeWithDcs,
+        mergedTsvRows,
+        setMergedTsvRows,
         showNotFound,
-        setShowErrors,
+        setShowNotFound,
         showErrors,
+        setShowErrors,
+        doneConverting,
+        setDoneConverting,
       }}
     >
       {children}

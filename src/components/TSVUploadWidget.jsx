@@ -6,7 +6,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 function TSVUploadWidget() {
-  const { selectedBook, selectedBranch, tsvContent, doConvert, setDoConvert, setTsvContent, dcsURL, processingRows } = useContext(AppContentContext);
+  const { selectedBook, selectedBranch, setInputTsvRows, inputTsvRows, doConvert, setDoConvert, dcsURL } = useContext(AppContentContext);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (event) => {
@@ -14,7 +14,7 @@ function TSVUploadWidget() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setTsvContent(e.target.result);
+        setInputTsvRows(e.target.result.split("\n").filter(row => row.trim()));
       };
       reader.readAsText(file);
     }
@@ -27,7 +27,7 @@ function TSVUploadWidget() {
   const handlePasteClick = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setTsvContent(text);
+      setInputTsvRows(text.split("\n").filter(row => row.trim()));
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
     }
@@ -37,7 +37,7 @@ function TSVUploadWidget() {
     try {
       const response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
       const text = await response.text();
-      setTsvContent(text);
+      setInputTsvRows(text.split("\n").filter(row => row.trim()));
     } catch (err) {
       console.error('Failed to fetch TSV content from DCS:', err);
     }
@@ -106,8 +106,8 @@ function TSVUploadWidget() {
         rows={10}
         variant="outlined"
         fullWidth
-        value={tsvContent}
-        onChange={(e) => setTsvContent(e.target.value)}
+        value={inputTsvRows.join("\n")}
+        onChange={(e) => setInputTsvRows(e.target.value.split("\n").filter(row => row.trim()))}
         label="Your Translation Notes TSV content with ULT quotes"
         placeholder="TSV content will appear here..."
         sx={{
@@ -122,8 +122,8 @@ function TSVUploadWidget() {
       <Button 
           variant="contained" 
           color="primary"
-          onClick={() => selectedBook && tsvContent && setDoConvert(true)}
-          disabled={doConvert || !tsvContent || !selectedBook}
+          onClick={() => selectedBook && inputTsvRows.length && setDoConvert(true)}
+          disabled={doConvert || !inputTsvRows.length || !selectedBook}
         >
           Convert
       </Button>

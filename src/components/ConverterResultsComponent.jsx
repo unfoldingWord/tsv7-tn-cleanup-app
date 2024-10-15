@@ -10,8 +10,8 @@ const HighlightedCell = styled('td')(({ theme, highlight }) => ({
   color: highlight === 'quoteNotFound' ? 'white' : 'inherit',
 }));
 
-const TabDelimitedTable = ({ data, showNotFound }) => {
-  const rows = data.filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND')).map((row) => row.split('\t'));
+const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
+  const rows = tsvRows.filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND'));
 
   const containsHebrewOrGreek = (text) => /[\u0590-\u05FF\u0370-\u03FF]/.test(text);
 
@@ -21,10 +21,21 @@ const TabDelimitedTable = ({ data, showNotFound }) => {
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
+              <td style={{ width: 1, color: 'grey', fontSize: '0.8em' }}>{rowIndex + 1}</td>
+              {row.split('\t').map((cell, cellIndex) => (
                 <HighlightedCell
                   key={cellIndex}
-                  highlight={cellIndex === 4 ? (containsHebrewOrGreek(cell) ? 'hebrewOrGreek' : cell.includes('QUOTE_NOT_FOUND') ? 'quoteNotFound' : null) : null}
+                  highlight={
+                    !inputTsvRows.includes(row)
+                      ? cellIndex === 4
+                        ? containsHebrewOrGreek(cell)
+                          ? 'hebrewOrGreek'
+                          : cell.includes('QUOTE_NOT_FOUND')
+                          ? 'quoteNotFound'
+                          : null
+                        : null
+                      : null
+                  }
                 >
                   {cell}
                 </HighlightedCell>
@@ -38,121 +49,114 @@ const TabDelimitedTable = ({ data, showNotFound }) => {
 };
 
 function ConverterResultsComponent() {
-  const { selectedBranch, selectedBook, convertedTsvRows, convertedErrors, conversionStats, mergeWithBranchTsv, setMergeWithBranchTsv, mergedTsvRows, dcsURL, setShowErrors, showErrors, setShowNotFound, showNotFound } =
-    useContext(AppContentContext);
-
-  const processingDone = conversionStats.done >= conversionStats.total;
+  const {
+    selectedBranch,
+    selectedBook,
+    inputTsvRows,
+    convertedTsvRows,
+    mergedTsvRows,
+    doConvert,
+    doneConverting,
+    errors,
+    rowsSkipped,
+    rowsFailed,
+    mergeWithDcs,
+    setMergeWithDcs,
+    dcsURL,
+    setShowErrors,
+    showErrors,
+    setShowNotFound,
+    showNotFound,
+  } = useContext(AppContentContext);
 
   const handleShowOnlyNotFoundCheckboxChange = (event) => {
     setShowNotFound(event.target.checked);
   };
 
   const handleMergeWithBranchTsvCheckboxChange = (event) => {
-    setMergeWithBranchTsv(event.target.checked);
+    setMergeWithDcs(event.target.checked);
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(
-      (mergeWithBranchTsv && conversionStats.total === conversionStats.done ? mergedTsvRows : convertedTsvRows)
-        .filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND'))
-        .join('\n')
-    );
+    navigator.clipboard.writeText((mergeWithDcs && doneConverting ? mergedTsvRows : convertedTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND')).join('\n'));
   };
 
   return (
     <>
-      {conversionStats.total ? (
-        <div id="converstion-stats">
-          {conversionStats.done} / {conversionStats.total} rows processed, {conversionStats.done - conversionStats.skipped - conversionStats.bad} quotes converted,{' '}
-          {conversionStats.skipped} skipped (already OrigL), {conversionStats.bad} not found (error or bad ULT quote)
+      {doConvert ? (
+        <div>
+          {convertedTsvRows.length} / {inputTsvRows.length} rows processed, {convertedTsvRows.length - rowsSkipped - rowsFailed} quotes converted, {rowsSkipped} skipped (already
+          OrigL), {rowsFailed} not found (error or bad ULT quote)
         </div>
-      ) : (
-        ''
-      )}
-      {convertedErrors.length ? (
+      ) : null}
+      {errors.length && doneConverting ? (
+        <FormControlLabel control={<Checkbox checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} label="Show Errors" />
+      ) : null}
+      {showErrors ? (
+        <TextField
+          label="Errors"
+          multiline
+          rows={4}
+          variant="outlined"
+          fullWidth
+          value={errors.join('\n')}
+          sx={{
+            marginTop: 2,
+            resize: 'both',
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'red',
+              },
+              '&:hover fieldset': {
+                borderColor: 'red',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'red',
+              },
+            },
+            '& .MuiInputBase-input': {
+              whiteSpace: 'nowrap',
+              overflowX: 'auto',
+              resize: 'both',
+            },
+          }}
+        />
+      ) : null}
+      {doneConverting ? (
         <>
-          <FormControlLabel control={<Checkbox checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} label="Show Errors" />
-          {showErrors ? (
-            <TextField
-              label="Errors"
-              multiline
-              rows={4}
-              variant="outlined"
-              fullWidth
-              value={convertedErrors.join('\n')}
-              sx={{
-                marginTop: 2,
-                resize: 'both',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'red',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'red',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'red',
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  whiteSpace: 'nowrap',
-                  overflowX: 'auto',
-                  resize: 'both',
-                },
-              }}
-            />
-          ) : (
-            ''
-          )}
-        </>
-      ) : (
-        ''
-      )}
-      {convertedTsvRows.length ? (
-        <>
-          {conversionStats.bad ? (
-            <FormControlLabel
-              control={<Checkbox checked={showNotFound} onChange={handleShowOnlyNotFoundCheckboxChange} color="primary" />}
-              label="Show only QUOTE_NOT_FOUND rows"
-            />
-          ) : (
-            ''
-          )}
-          {processingDone ? (
-            <div>
-              <FormControlLabel
-                control={<Checkbox checked={mergeWithBranchTsv} onChange={handleMergeWithBranchTsvCheckboxChange} color="primary" style={{ clear: 'both' }} />}
-                label={<>Merge with DCS <em>{selectedBranch}/tn_{selectedBook.toUpperCase()}.tsv</em></>}
-              />
-              <div>
-                <div id="copy-info" style={{ float: 'left' }}>
-                  {mergeWithBranchTsv ? (
-                    <>
-                      Click the copy icon to copy the below merged content and{' '}
-                      <a href={`${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`} target="_blank">
-                        click here
-                      </a>{' '}
-                      to open the editor of this file on DCS to paste it in.
-                    </>
-                  ) : (
-                    ''
-                  )}
-                </div>
-                <IconButton onClick={handleCopyToClipboard} color="primary" aria-label="copy to clipboard" sx={{ float: 'right' }}>
-                  <ContentCopyIcon /> Copy
-                </IconButton>
-              </div>
+          <FormControlLabel control={<Checkbox checked={showNotFound} onChange={handleShowOnlyNotFoundCheckboxChange} color="primary" />} label="Show only QUOTE_NOT_FOUND rows" />
+          <FormControlLabel
+            control={<Checkbox checked={mergeWithDcs} onChange={handleMergeWithBranchTsvCheckboxChange} color="primary" style={{ clear: 'both' }} />}
+            label={
+              <>
+                Merge with DCS{' '}
+                <em>
+                  {selectedBranch}/tn_{selectedBook.toUpperCase()}.tsv
+                </em>
+              </>
+            }
+          />
+          <div style={{ clear: 'both' }}>
+            <div id="copy-info" style={{ float: 'left' }}>
+              {mergeWithDcs ? (
+                <>
+                  Click the copy icon to copy the below merged content and{' '}
+                  <a href={`${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`} target="_blank">
+                    click here
+                  </a>{' '}
+                  to open the editor of this file on DCS to paste it in.
+                </>
+              ) : null}
             </div>
-          ) : (
-            ''
-          )}
+            <IconButton onClick={handleCopyToClipboard} color="primary" aria-label="copy to clipboard" sx={{ float: 'right' }}>
+              <ContentCopyIcon /> Copy
+            </IconButton>
+          </div>
           <div id="tab-delimited-table" style={{ clear: 'both' }}>
-            <TabDelimitedTable data={conversionStats.total === conversionStats.done && mergeWithBranchTsv ? mergedTsvRows : convertedTsvRows} showNotFound={showNotFound} />
+            <TabDelimitedTable tsvRows={mergeWithDcs ? mergedTsvRows : convertedTsvRows} inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
           </div>
         </>
-      ) : (
-        ''
-      )}
+      ) : null}
     </>
   );
 }
