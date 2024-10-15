@@ -160,16 +160,16 @@ function ConverterResultsComponent() {
                         <strong>To commit your work:</strong>
                       </td>
                       <td>
-                        When you click{' '}
+                        Click{' '}
                         <strong>
                           <em>Paste into DCS Editor</em>
                         </strong>{' '}
-                        below, the converted rows will be copied to your computer's clibboard and a new window will open the file's editor on DCS (
+                        below. The converted rows will be copied to your computer's clibboard and a new window will open the file's editor on DCS (
                         <em>make sure your browser allows popups for this site</em>). In the DCS Editor, select all the existing text and replace with your copied text by pasting it in. Scroll down
                         below the editor
                         {selectedBranch == 'master' ? (
                           <>
-                            , choose to create a new branch <em>&lt;username&gt;-tc-create-1</em>
+                            , choose to create a new branch and name it <em>&lt;username&gt;-tc-create-1</em>,
                           </>
                         ) : (
                           ''
