@@ -1,9 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import TSV7ULTQuotesToOrigLQuotes from 'tsv7-ult-quotes-to-origl-quotes';
-import { BibleBookData } from '../common/books';
-import Papa from 'papaparse';
-
-export const AppContentContext = createContext();
+import PropTypes from 'prop-types';
+import tsv7_ult_quotes_to_origl_quotes from 'tsv7-ult-quotes-to-origl-quotes';
 
 const replaceWithCurlyQuotes = (text) => {
   return text
@@ -12,7 +9,6 @@ const replaceWithCurlyQuotes = (text) => {
     .replace(/'/g, '‘') // Left single quote
     .replace(/(\W|^)"(\S)/g, '$1“$2') // Left double quote
     .replace(/(\S)"(\W|$)/g, '$1”$2') // Right double quote
-    .replace(/"/g, '”'); // Default to right double quote
 };
 
 const getUniqueID = (ids) => {
@@ -21,7 +17,9 @@ const getUniqueID = (ids) => {
     newID = Math.random().toString(36).substring(2, 6);
   } while (ids.has(newID));
   return newID;
-}
+};
+
+export const AppContentContext = createContext();
 
 export const AppContentProvider = ({ children }) => {
   const [server, setServer] = useState(localStorage.getItem('server') || 'PROD');
@@ -32,20 +30,13 @@ export const AppContentProvider = ({ children }) => {
   const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
-  const [rowsSkipped, setRowsSkipped] = useState(0);
-  const [rowsFailed, setRowsFailed] = useState(0);
   const [errors, setErrors] = useState([]);
 
   const [doConvert, setDoConvert] = useState(false);
-  const [processingRows, setProcessingRows] = useState(false);
   const [showNotFound, setShowNotFound] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-  const [doneConverting, setDoneConverting] = useState(false);
   const [doNotPromptAgain, setDoNotPromptAgain] = useState(false);
   const [showOnlyConvertedRows, setShowOnlyConvertedRows] = useState(false);
-  const [lastProcessedRowIndex, setLastProcessedRowIndex] = useState(0);
-
-  const [existingIDs, setExistingIDs] = useState(new Set());
 
   // useEffect(() => {
   //   const handlePaste = (event) => {
@@ -99,82 +90,31 @@ export const AppContentProvider = ({ children }) => {
     setConvertedTsvRows([]);
     setMergedTsvRows([]);
     setErrors([]);
-    setRowsSkipped(0);
-    setRowsFailed(0);
     setShowOnlyConvertedRows(false);
     setShowNotFound(false);
-    setProcessingRows(false);
-    setDoneConverting(false);
-    setExistingIDs(new Set());
     setDoNotPromptAgain(false);
-    setLastProcessedRowIndex(0);
   }, [selectedBook, inputTsvRows]);
 
   useEffect(() => {
-    const processTsvRow = async () => {
-      let rowIdx = lastProcessedRowIndex;
-
-      while (rowIdx < inputTsvRows.length) {
-        let row = inputTsvRows[rowIdx++];
-
-        const columns = row.split('\t');
-
-        if (columns.length != 7) {
-          setConvertedTsvRows((prev) => [...prev, row]);
-          setErrors((prev) => [...prev, `Error: Row #${convertedTsvRows.length + 1} is malformed: ${row}`]);
-          setRowsFailed((prev) => prev + 1);
-          continue;
+    const doConvertion = async () => {
+      try {
+        const result = await tsv7_ult_quotes_to_origl_quotes(selectedBook, inputTsvRows.join('\n'), dcsURL);
+        if (result.output.length) {
+          setConvertedTsvRows(result.output);
         }
-
-        if (existingIDs.has(columns[1])) {
-          columns[1] = getUniqueID(existingIDs);          
+        if (result.errors.length) {
+          setErrors(result.errors);
         }
-        existingIDs.add(columns[1]);
-        setExistingIDs((prev) => new Set(prev).add(columns[1]));
-
-        const newNote = replaceWithCurlyQuotes(columns[6]);
-        if (newNote != columns[6]) {
-          columns[6] = newNote;
-        }
-
-        row = columns.join("\t");
-
-        if (columns[0] === 'Reference' || !/[a-zA-Z]/.test(columns[4].replace(/(\\n|<br>)/g, ''))) {
-          setConvertedTsvRows((prev) => [...prev, row]);
-          setRowsSkipped((prev) => prev + 1);
-          continue;
-        }
-        try {
-          const result = await TSV7ULTQuotesToOrigLQuotes(selectedBook, row, dcsURL);
-          if (result.output.length) {
-            setConvertedTsvRows((prev) => [...prev, ...result.output]);
-          } else {
-            setConvertedTsvRows((prev) => [...prev, row]);
-          }
-          if (result.errors.length || result.output?.[0]?.includes('QUOTE_NOT_FOUND: ')) {
-            setErrors((prev) => [...prev, ...result.errors]);
-            setRowsFailed((prev) => prev + 1);
-          }
-        } catch (error) {
-          setConvertedTsvRows((prev) => [...prev, row]);
-          setRowsFailed((prev) => prev + 1);
-          setErrors((prev) => [...prev, `Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
-          console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
-        }
-        break; // We're returning so components can be updated with the progress stats. This will be triggered again.
-      }
-      setLastProcessedRowIndex(rowIdx);
-      setProcessingRows(false);
-      if (rowIdx >= inputTsvRows.length) {
-        setDoneConverting(true);
+      } catch (error) {
+        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
+        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
       }
     };
 
-    if (doConvert && !processingRows && !doneConverting && inputTsvRows.length > convertedTsvRows.length) {
-      setProcessingRows(true);
-      processTsvRow();
+    if (doConvert) {
+      doConvertion();
     }
-  }, [doConvert, convertedTsvRows, processingRows, doneConverting, lastProcessedRowIndex]);
+  }, [doConvert]);
 
   useEffect(() => {
     const doMerge = async () => {
@@ -202,11 +142,13 @@ export const AppContentProvider = ({ children }) => {
         if (!allTsvMap.has(ref)) {
           allTsvMap.set(ref, []);
         }
+        columns[6] = replaceWithCurlyQuotes(columns[6]);
+        row = columns.join('\t');
         allTsvMap.get(ref).push(row);
         idToRefMap.set(id, ref);
       });
 
-      const convertedRefs = new Set();;
+      const convertedRefs = new Set();
       const convertedTsvIDs = new Set();
       convertedTsvRows.forEach((row) => {
         const columns = row.split('\t');
@@ -217,7 +159,9 @@ export const AppContentProvider = ({ children }) => {
           allTsvMap.set(ref, []);
           convertedRefs.add(ref);
         }
-        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && ! convertedTsvIDs.has(id)) {
+        columns[6] = replaceWithCurlyQuotes(columns[6]);
+        row = columns.join('\t');
+        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && !convertedTsvIDs.has(id)) {
           allTsvMap.get(ref).push(row);
         } else {
           const ids = new Set([...idToRefMap.keys(), ...convertedTsvIDs]);
@@ -266,23 +210,30 @@ export const AppContentProvider = ({ children }) => {
       setMergedTsvRows(mergedRows);
     };
 
-    if (doneConverting && selectedBranch && ! mergedTsvRows.length) {
+    if (selectedBranch && convertedTsvRows.length && !mergedTsvRows.length) {
       doMerge();
     }
-  }, [convertedTsvRows, doneConverting, dcsURL, selectedBranch, selectedBook, mergedTsvRows]);
+  }, [convertedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows]);
 
   useEffect(() => {
     if (mergedTsvRows.length > 0 && !doNotPromptAgain) {
       setDoNotPromptAgain(true);
-      const userConfirmed = window.confirm(`Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${selectedBranch == 'master' ? '\n\nNote: Before commiting changes, select the create branch option and change "patch" to "tc-create", e.g.: richmahn-tc-create-1' : ''}\n\nYou will be redirected in this window to DCS if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`);
+      const userConfirmed = window.confirm(
+        `Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${
+          selectedBranch == 'master' ? '\n\nNote: Before commiting changes, select the create branch option and change "patch" to "tc-create", e.g.: richmahn-tc-create-1' : ''
+        }\n\nYou will be redirected in this window to DCS if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`
+      );
       if (userConfirmed) {
         const mergedContent = mergedTsvRows.join('\n');
-        navigator.clipboard.writeText(mergedContent).then(() => {
-          const dcsEditorUrl = `${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`;
-          window.location.href = dcsEditorUrl;
-        }).catch((err) => {
-          console.error('Failed to copy text to clipboard:', err);
-        });
+        navigator.clipboard
+          .writeText(mergedContent)
+          .then(() => {
+            const dcsEditorUrl = `${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`;
+            window.location.href = dcsEditorUrl;
+          })
+          .catch((err) => {
+            console.error('Failed to copy text to clipboard:', err);
+          });
       }
     }
   }, [mergedTsvRows, selectedBook, dcsURL, selectedBranch]);
@@ -302,14 +253,8 @@ export const AppContentProvider = ({ children }) => {
         setConvertedTsvRows,
         doConvert,
         setDoConvert,
-        processingRows,
-        setProcessingRows,
         errors,
         setErrors,
-        rowsSkipped,
-        setRowsSkipped,
-        rowsFailed,
-        setRowsFailed,
         showOnlyConvertedRows,
         setShowOnlyConvertedRows,
         mergedTsvRows,
@@ -318,11 +263,13 @@ export const AppContentProvider = ({ children }) => {
         setShowNotFound,
         showErrors,
         setShowErrors,
-        doneConverting,
-        setDoneConverting,
       }}
     >
       {children}
     </AppContentContext.Provider>
   );
+};
+
+AppContentProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

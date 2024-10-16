@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Autocomplete, TextField, Box, Typography } from '@mui/material';
+import React, { useContext } from 'react';
+import { Autocomplete, TextField } from '@mui/material';
 import { AppContentContext } from '../context/AppContentProvider';
 import { BibleBookData } from '../common/books';
 
