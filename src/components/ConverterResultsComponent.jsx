@@ -39,7 +39,7 @@ function ConverterResultsComponent() {
   return (
     <>
       {convertedTsvRows.length ? (
-        <Box sx={{marginY: 2, padding: 1}}>
+        <Box sx={{ marginY: 2, padding: 1 }}>
           <div>
             {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
@@ -92,32 +92,34 @@ function ConverterResultsComponent() {
                     </a>
                   </p>
                   <table>
-                    <tr>
-                      <td style={{ verticalAlign: 'top', whiteSpace: 'nowrap' }}>
-                        <strong>To commit your work:</strong>
-                      </td>
-                      <td>
-                        Click{' '}
-                        <strong>
-                          <em>Paste into DCS Editor</em>
-                        </strong>{' '}
-                        below. The converted rows will be copied to your computer&apos;s clibboard and a new window will open the file&apos;s editor on DCS (
-                        <em>make sure your browser allows popups for this site</em>). In the DCS Editor, select all the existing text and replace with your copied text by pasting
-                        it in. Scroll down below the editor
-                        {selectedBranch == 'master' ? (
-                          <>
-                            , choose to create a new branch and name it <em>&lt;username&gt;-tc-create-1</em>,
-                          </>
-                        ) : (
-                          ''
-                        )}{' '}
-                        and click{' '}
-                        <stong>
-                          <em>Commit Changes</em>
-                        </stong>
-                        .
-                      </td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td style={{ verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                          <strong>To commit your work:</strong>
+                        </td>
+                        <td>
+                          Click{' '}
+                          <strong>
+                            <em>Paste into DCS Editor</em>
+                          </strong>{' '}
+                          below. The converted rows will be copied to your computer&apos;s clibboard and a new window will open the file&apos;s editor on DCS (
+                          <em>make sure your browser allows popups for this site</em>). In the DCS Editor, select all the existing text and replace with your copied text by pasting
+                          it in. Scroll down below the editor
+                          {selectedBranch == 'master' ? (
+                            <>
+                              , choose to create a new branch and name it <em>&lt;username&gt;-tc-create-1</em>,
+                            </>
+                          ) : (
+                            ''
+                          )}{' '}
+                          and click{' '}
+                          <strong>
+                            <em>Commit Changes</em>
+                          </strong>
+                          .
+                        </td>
+                      </tr>
+                    </tbody>
                   </table>
                 </>
               ) : (

@@ -142,8 +142,10 @@ export const AppContentProvider = ({ children }) => {
         if (!allTsvMap.has(ref)) {
           allTsvMap.set(ref, []);
         }
-        columns[6] = replaceWithCurlyQuotes(columns[6]);
-        row = columns.join('\t');
+        if (columns[6]) {
+          columns[6] = replaceWithCurlyQuotes(columns[6]);
+          row = columns.join('\t');
+        }
         allTsvMap.get(ref).push(row);
         idToRefMap.set(id, ref);
       });
