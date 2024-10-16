@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import tsv7_ult_quotes_to_origl_quotes from 'tsv7-ult-quotes-to-origl-quotes';
 
 const replaceWithCurlyQuotes = (text) => {
+  if (!text) {
+    return text;
+  }
   return text
     .replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
     .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's'
@@ -161,8 +164,10 @@ export const AppContentProvider = ({ children }) => {
           allTsvMap.set(ref, []);
           convertedRefs.add(ref);
         }
-        columns[6] = replaceWithCurlyQuotes(columns[6]);
-        row = columns.join('\t');
+        if (columns[6]) {
+          columns[6] = replaceWithCurlyQuotes(columns[6]);
+          row = columns.join('\t');
+        }
         if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && !convertedTsvIDs.has(id)) {
           allTsvMap.get(ref).push(row);
         } else {
