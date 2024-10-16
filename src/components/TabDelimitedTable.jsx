@@ -10,7 +10,7 @@ const HighlightedCell = styled('td')(({ highlight }) => ({
 }));
 
 const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
-  const containsHebrewOrGreek = (text) => /[\u0590-\u05FF\u0370-\u03FF]/.test(text);
+  const containsHebrewOrGreek = (text) => /[\u0590-\u05FF\uFB1D-\uFB4F\u0370-\u03FF\u1F00-\u1FFF]/.test(text);
 
   const inputRefs = inputTsvRows.map((row) => row.split('\t')[0]).filter((id) => id != 'Reference');
 
