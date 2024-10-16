@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import tsv7_ult_quotes_to_origl_quotes from 'tsv7-ult-quotes-to-origl-quotes';
+import { BibleBookData } from '../common/books';
 
 const replaceWithCurlyQuotes = (text) => {
   if (!text) {
@@ -70,8 +71,8 @@ export const AppContentProvider = ({ children }) => {
       localStorage.setItem('dcsURL', newDcsURL);
     }
 
-    if (book) {
-      setSelectedBook(book);
+    if (book && BibleBookData[book.toLowerCase()]) {
+      setSelectedBook(book.toLowerCase());
     }
 
     if (branch) {

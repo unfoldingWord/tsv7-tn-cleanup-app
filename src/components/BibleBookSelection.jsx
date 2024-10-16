@@ -12,8 +12,8 @@ function BibleBookSelection() {
       getOptionLabel={(option) => `${BibleBookData[option]?.title} (${option})`}
       value={selectedBook}
       onChange={(event, newValue) => {
-        if (newValue) {
-          setSelectedBook(newValue);
+        if (newValue && BibleBookData[newValue.toLowerCase()]) {
+          setSelectedBook(newValue.toLowerCase());
         }
       }}
       renderInput={(params) => <TextField {...params} label="Select a Bible Book" variant="outlined" fullWidth />}

@@ -15,19 +15,32 @@ const BranchSelection = () => {
         const branchNames = response.data.map(branch => branch.name)
         branchNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
         setBranches(branchNames);
+        if (! branchNames.includes(selectedBranch)) {
+          setSelectedBranch('master');
+        }
       } catch (error) {
         console.error('Error fetching branches:', error);
       }
     };
 
     fetchBranches();
+
+    const intervalId = setInterval(fetchBranches, 100000); // 100000 ms = 1 minute
+
+    return () => clearInterval(intervalId);
   }, [dcsURL]);
+
+  useEffect(() => {
+    if (branches.length && ! branches.includes(selectedBranch)) {
+      setSelectedBranch('master');
+    }
+  }, [branches, selectedBranch]);
 
   return (
     <Autocomplete
       value={selectedBranch}
       onChange={(event, newValue) => {
-        if (newValue) {
+        if (newValue && branches.includes(newValue)) {
           setSelectedBranch(newValue);
         }
       }}      
