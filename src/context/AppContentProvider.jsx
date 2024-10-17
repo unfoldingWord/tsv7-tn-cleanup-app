@@ -229,7 +229,7 @@ export const AppContentProvider = ({ children }) => {
       const userConfirmed = window.confirm(
         `Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${
           selectedBranch == 'master' ? '\n\nNote: Before commiting changes, select the create branch option and change "patch" to "tc-create", e.g.: richmahn-tc-create-1' : ''
-        }\n\nYou will be redirected in this window to DCS if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`
+        }\n\nA nnew windows for DCS will open if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`
       );
       if (userConfirmed) {
         const mergedContent = mergedTsvRows.join('\n');
@@ -237,7 +237,7 @@ export const AppContentProvider = ({ children }) => {
           .writeText(mergedContent)
           .then(() => {
             const dcsEditorUrl = `${dcsURL}/unfoldingWord/en_tn/_edit/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`;
-            window.location.href = dcsEditorUrl;
+            window.open(dcsEditorUrl, '_blank');
           })
           .catch((err) => {
             console.error('Failed to copy text to clipboard:', err);
