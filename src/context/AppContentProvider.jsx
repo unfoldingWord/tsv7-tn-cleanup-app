@@ -188,15 +188,27 @@ export const AppContentProvider = ({ children }) => {
           return [chapNum, verseNum];
         };
 
-        const [aChap, aVerse] = parseReference(a);
-        const [bChap, bVerse] = parseReference(b);
+        let [aChap, aVerse] = parseReference(a);
+        let [bChap, bVerse] = parseReference(b);
 
         if (aChap === bChap) {
-          if (typeof aVerse === 'string' && typeof bVerse === 'string') {
+          if (typeof aVerse === 'string' || typeof bVerse === 'string') {
+            if (aVerse === 'intro') return -1;
+            if (bVerse === 'intro') return 1;
+            if (typeof aVerse === 'number') aVerse = `${aVerse}-${aVerse}`;
+            if (typeof bVerse === 'number') bVerse = `${bVerse}-${bVerse}`;
+            const aVerses = aVerse.split('-').map(Number);
+            const bVerses = bVerse.split('-').map(Number);
+            if (aVerses[0] && bVerses[0]) {
+              if (aVerses[0] === bVerses[0]) {
+                return aVerses[1] - bVerses[1];
+              }
+              return aVerses[0] - bVerses[0];
+            }
+            if (typeof aVerse === 'string') return -1;
+            if (typeof bVerse === 'string') return 1;
             return aVerse.localeCompare(bVerse);
           }
-          if (typeof aVerse === 'string') return -1;
-          if (typeof bVerse === 'string') return 1;
           return aVerse - bVerse;
         }
 
