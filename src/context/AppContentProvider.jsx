@@ -104,7 +104,11 @@ export const AppContentProvider = ({ children }) => {
       try {
         const result = await tsv7_ult_quotes_to_origl_quotes(selectedBook, inputTsvRows.join('\n'), dcsURL);
         if (result.output.length) {
-          setConvertedTsvRows(result.output);
+          const rows = result.output;
+          for(const i in rows) {
+            rows[i] = replaceWithCurlyQuotes(rows[i])
+          }
+          setConvertedTsvRows(rows);
         }
         if (result.errors.length) {
           setErrors(result.errors);
