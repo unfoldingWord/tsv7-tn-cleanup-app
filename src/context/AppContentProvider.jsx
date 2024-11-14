@@ -197,8 +197,8 @@ export const AppContentProvider = ({ children }) => {
             if (bVerse === 'intro') return 1;
             if (typeof aVerse === 'number') aVerse = `${aVerse}-${aVerse}`;
             if (typeof bVerse === 'number') bVerse = `${bVerse}-${bVerse}`;
-            const aVerses = aVerse.split('-').map(Number);
-            const bVerses = bVerse.split('-').map(Number);
+            const aVerses = aVerse.split(/[-,]/).map(Number);
+            const bVerses = bVerse.split(/[-,]/).map(Number);
             if (aVerses[0] && bVerses[0]) {
               if (aVerses[0] === bVerses[0]) {
                 return aVerses[1] - bVerses[1];
