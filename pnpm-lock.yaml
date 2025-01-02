@@ -26,18 +26,12 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
-      deepcopy:
-        specifier: ^2.1.0
-        version: 2.1.0
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
-      proskomma:
-        specifier: ^0.9.3
-        version: 0.9.3(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -45,8 +39,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       tsv7-ult-quotes-to-origl-quotes:
-        specifier: 1.0.28
-        version: 1.0.28(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
+        specifier: ^1.0.29
+        version: 1.0.29(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
@@ -3012,8 +3006,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.28:
-    resolution: {integrity: sha512-0VIAYQlMN3rz9T/B1zEGDd6ekDJEyNaXczGtw2iRTqoqg7NgLzgOOtXUc9km46LDmR4V0mX0hSHcUeOudT9NDA==}
+  tsv7-ult-quotes-to-origl-quotes@1.0.29:
+    resolution: {integrity: sha512-xZvj5rwT1dAS8HDvhe1vU2LM+ha8hj+8iXLuUkxGWV5qD8n4Rq98nb5l3y3+fekO7ijZEVaiT3fZvkMLGuh/rg==}
 
   tty-browserify@0.0.1:
     resolution: {integrity: sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==}
@@ -6700,7 +6694,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.28(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
+  tsv7-ult-quotes-to-origl-quotes@1.0.29(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
     dependencies:
       axios: 1.7.7
       buffer: 6.0.3
