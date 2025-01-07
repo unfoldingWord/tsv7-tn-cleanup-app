@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import './App.css';
 import TSVUploadWidget from './components/TSVUploadWidget';
 import BibleBookSelection from './components/BibleBookSelection';
-import { AppContentProvider, AppContentContext } from './context/AppContentProvider';
+import { AppContentProvider } from './context/AppContentProvider';
 import BranchSelection from './components/BranchSelection';
 import AppHeader from './components/AppHeader';
 import ConverterResultsComponent from './components/ConverterResultsComponent';

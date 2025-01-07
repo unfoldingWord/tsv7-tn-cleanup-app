@@ -10,8 +10,8 @@ function ConverterResultsComponent() {
     selectedBranch,
     selectedBook,
     inputTsvRows,
-    convertedTsvRows,
     mergedTsvRows,
+    glQuotesTsvRows,
     errors,
     showOnlyConvertedRows,
     setShowOnlyConvertedRows,
@@ -20,6 +20,7 @@ function ConverterResultsComponent() {
     showErrors,
     setShowNotFound,
     showNotFound,
+    checkboxStates,
   } = useContext(AppContentContext);
 
   const handleShowOnlyNotFoundCheckboxChange = (event) => {
@@ -31,17 +32,17 @@ function ConverterResultsComponent() {
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText((!showOnlyConvertedRows ? mergedTsvRows : convertedTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND')).join('\n'));
+    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND')).join('\n'));
   };
 
-  const failedCount = convertedTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;
+  const failedCount = glQuotesTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;
 
   return (
     <>
-      {convertedTsvRows.length ? (
+      {glQuotesTsvRows.length ? (
         <Box sx={{ marginY: 2, padding: 1 }}>
           <div>
-            {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
+            {glQuotesTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
           {errors.length ? (
             <FormControlLabel control={<Checkbox checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} label="Show Errors" />
@@ -78,7 +79,7 @@ function ConverterResultsComponent() {
           ) : null}
           <div style={{ clear: 'both', position: 'relative' }}>
             <div id="copy-info" style={{ float: 'left' }}>
-              {!showOnlyConvertedRows ? (
+              {!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? (
                 <>
                   <p>
                     Below are the converted rows. They have been merged with the TN file of the book from the selected branch:{' '}
@@ -126,10 +127,10 @@ function ConverterResultsComponent() {
                 ''
               )}
             </div>
-            <FormControlLabel
+            {checkboxStates.mergeWithDCS && <FormControlLabel
               control={<Checkbox checked={showOnlyConvertedRows} onChange={handleShowOnlyConvertedRowsCheckboxChange} color="primary" style={{ clear: 'both' }} />}
               label={'Show only your rows from above'}
-            />
+            />}
             <FormControlLabel
               control={<Checkbox checked={showNotFound} onChange={handleShowOnlyNotFoundCheckboxChange} color="primary" />}
               label="Show only QUOTE_NOT_FOUND rows"
@@ -193,7 +194,7 @@ function ConverterResultsComponent() {
                 ) : null}
               </div>
             </div>
-            <TabDelimitedTable tsvRows={showOnlyConvertedRows ? convertedTsvRows : mergedTsvRows} inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
+            <TabDelimitedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows } inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
           </div>
         </Box>
       ) : null}

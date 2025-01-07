@@ -4,9 +4,10 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { AppContentContext } from '../context/AppContentProvider';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 function TSVUploadWidget() {
-  const { selectedBook, selectedBranch, setInputTsvRows, inputTsvRows, doConvert, setDoConvert, dcsURL, convertedTsvRows } = useContext(AppContentContext);
+  const { selectedBook, selectedBranch, setInputTsvRows, setCheckboxStates, inputTsvRows, doConvert, setDoConvert, dcsURL, glQuotesTsvRows, checkboxStates } = useContext(AppContentContext);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (event) => {
@@ -41,6 +42,17 @@ function TSVUploadWidget() {
     } catch (err) {
       console.error('Failed to fetch TSV content from DCS:', err);
     }
+  };
+
+  const handleCheckboxChange = (event) => {
+    setCheckboxStates(prev => {
+      const newState = {...prev};
+      newState[event.target.name] = event.target.checked;
+      if (event.target.name === "makeGLCols") {
+        newState["mergeWithDCS"] = false;
+      }
+      return newState;
+    });
   };
 
   return (
@@ -114,6 +126,51 @@ function TSVUploadWidget() {
           },
         }}
       />
+
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={checkboxStates.convertToGreekHebrew}
+              onChange={handleCheckboxChange}
+              name="convertToGreekHebrew"
+            />
+          }
+          label="1. Convert English (ULT) quotes to Greek/Hebrew in the `Quote` field"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={checkboxStates.standardizeQuotes}
+              onChange={handleCheckboxChange}
+              name="standardizeQuotes"
+            />
+          }
+          label="2. Standardize/Fix all `Quote`s by converting to English and then back to Greek/Hebrew"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={checkboxStates.mergeWithDCS && !checkboxStates.makeGLCols}
+              onChange={handleCheckboxChange}
+              name="mergeWithDCS"
+              disabled={checkboxStates.makeGLCols}
+            />
+          }
+          label="3. Merge with the full TN file from DCS and copy to clipboard to paste to DCS"
+        />
+        <div style={{textAlign: "left"}}>or</div>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={checkboxStates.makeGLCols}
+              onChange={handleCheckboxChange}
+              name="makeGLCols"
+            />
+          }
+          label="3. Create GL Quote and Occurrence columns with the English from the Quote field"
+        />
+      </FormGroup>
       <Button
         variant="contained"
         color="primary"
@@ -122,7 +179,7 @@ function TSVUploadWidget() {
             setDoConvert(true);
           }
         }}
-        disabled={doConvert || !inputTsvRows.length || !selectedBook}
+        disabled={doConvert || !inputTsvRows.length || !selectedBook || !Object.values(checkboxStates).some((v) => v)}
         sx={{
           marginTop: '5px',
           boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
@@ -133,10 +190,9 @@ function TSVUploadWidget() {
         }}
       >
         Convert
-        {doConvert && !convertedTsvRows.length ? (
+        {doConvert && !glQuotesTsvRows.length ? (
           <>
-            ing...
-            <CircularProgress size={24} />
+            ing... <CircularProgress size={24} />
           </>
         ) : null}
       </Button>

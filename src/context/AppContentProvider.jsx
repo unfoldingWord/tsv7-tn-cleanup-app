@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import tsv7_ult_quotes_to_origl_quotes from 'tsv7-ult-quotes-to-origl-quotes';
+import { convertULTQuotes2OL, addGLQuoteCols } from 'tsv7-ult-quotes-to-origl-quotes';
 import { BibleBookData } from '../common/books';
 
 const replaceWithCurlyQuotes = (text) => {
@@ -33,7 +33,9 @@ export const AppContentProvider = ({ children }) => {
 
   const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
+  const [standardizedTsvRows, setStandardizedTsvRows] = useState([]);
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
+  const [glQuotesTsvRows, setGLQuotesTsvRows] = useState([]);
   const [errors, setErrors] = useState([]);
 
   const [doConvert, setDoConvert] = useState(false);
@@ -41,6 +43,12 @@ export const AppContentProvider = ({ children }) => {
   const [showErrors, setShowErrors] = useState(false);
   const [doNotPromptAgain, setDoNotPromptAgain] = useState(false);
   const [showOnlyConvertedRows, setShowOnlyConvertedRows] = useState(false);
+  const [checkboxStates, setCheckboxStates] = useState({
+    convertToGreekHebrew: true,
+    standardizeQuotes: false,
+    makeGLCols: false,
+    mergeWithDCS: true,    
+  });
 
   // useEffect(() => {
   //   const handlePaste = (event) => {
@@ -92,17 +100,19 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     setDoConvert(false);
     setConvertedTsvRows([]);
+    setStandardizedTsvRows([]);
     setMergedTsvRows([]);
+    setGLQuotesTsvRows([]);
     setErrors([]);
     setShowOnlyConvertedRows(false);
     setShowNotFound(false);
     setDoNotPromptAgain(false);
-  }, [selectedBook, inputTsvRows]);
+  }, [selectedBook, inputTsvRows, checkboxStates]);
 
   useEffect(() => {
-    const doConvertion = async () => {
+    const doUlt2OL = async () => {
       try {
-        const result = await tsv7_ult_quotes_to_origl_quotes(selectedBook, inputTsvRows.join('\n'), dcsURL);
+        const result = await convertULTQuotes2OL(selectedBook, inputTsvRows.join('\n'), dcsURL);
         if (result.output.length) {
           const rows = result.output;
           for(const i in rows) {
@@ -119,10 +129,58 @@ export const AppContentProvider = ({ children }) => {
       }
     };
 
-    if (doConvert) {
-      doConvertion();
+    if (doConvert && !convertedTsvRows.length) {
+      if (checkboxStates.convertToGreekHebrew) {
+        doUlt2OL();
+      } else {
+        setConvertedTsvRows(inputTsvRows);
+      }
     }
-  }, [doConvert]);
+  }, [doConvert, convertedTsvRows, checkboxStates.convertToGreekHebrew]);
+
+  useEffect(() => {
+    const standardizeQuotes = async () => {
+      try {
+        const result = await addGLQuoteCols(selectedBook, convertedTsvRows.join('\n'), dcsURL);
+        console.log(result);
+        let result2;
+        if (result.output.length) {
+            const updatedRows = result.output.map((row, idx) => {
+              const columns = row.split('\t');
+              if (idx !== 0 && columns[6] && columns[6] !== 'QUOTE_NOT_FOUND') {
+                columns[4] = columns[6];
+                columns[5] = columns[7];
+              }
+              return [...columns.slice(0, 6), columns[8]].join('\t');
+            });
+          result2 = await convertULTQuotes2OL(selectedBook, updatedRows.join('\n'), dcsURL);
+          if (result2.output.length) {
+            const rows = result2.output;
+            for(const i in rows) {
+              rows[i] = replaceWithCurlyQuotes(rows[i])
+            }
+            setStandardizedTsvRows(rows);
+          }
+        }
+        if (result.errors.length) {
+          setErrors(result.errors);
+        } else if (result2.errors.length) {
+          setErrors(result2.errors);
+        }
+      } catch (error) {
+        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
+        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
+      }
+    };
+
+    if(doConvert &&  convertedTsvRows.length && !standardizedTsvRows.length) {
+      if (checkboxStates.standardizeQuotes) {
+        standardizeQuotes();
+      } else {
+        setStandardizedTsvRows(convertedTsvRows);
+      }
+    }
+  }, [doConvert, convertedTsvRows, standardizedTsvRows, checkboxStates.standardizeQuotes]);
 
   useEffect(() => {
     const doMerge = async () => {
@@ -160,7 +218,7 @@ export const AppContentProvider = ({ children }) => {
 
       const convertedRefs = new Set();
       const convertedTsvIDs = new Set();
-      convertedTsvRows.forEach((row) => {
+      standardizedTsvRows.forEach((row) => {
         const columns = row.split('\t');
         if (columns.length < 2 || columns[0] === 'Reference') return;
         let [ref, id] = columns;
@@ -234,13 +292,13 @@ export const AppContentProvider = ({ children }) => {
       setMergedTsvRows(mergedRows);
     };
 
-    if (selectedBranch && convertedTsvRows.length && !mergedTsvRows.length) {
+    if (selectedBranch && standardizedTsvRows.length && !mergedTsvRows.length && checkboxStates.mergeWithDCS) {
       doMerge();
     }
-  }, [convertedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows]);
+  }, [standardizedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows, checkboxStates.mergeWithDCS]);
 
   useEffect(() => {
-    if (mergedTsvRows.length > 0 && !doNotPromptAgain) {
+    if (mergedTsvRows.length > 0 && !doNotPromptAgain && doConvert === "ult2ol") {
       setDoNotPromptAgain(true);
       const userConfirmed = window.confirm(
         `Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${
@@ -261,6 +319,36 @@ export const AppContentProvider = ({ children }) => {
       }
     }
   }, [mergedTsvRows, selectedBook, dcsURL, selectedBranch]);
+
+  useEffect(() => {
+    const doGLQuoteCols = async () => {
+      try {
+        const result = await addGLQuoteCols(selectedBook, standardizedTsvRows.join('\n'), dcsURL);
+        console.log(result);
+        if (result.output.length) {
+          const rows = result.output;
+          for(const i in rows) {
+            rows[i] = replaceWithCurlyQuotes(rows[i])
+          }
+          setGLQuotesTsvRows(rows);
+        }
+        if (result.errors.length) {
+          setErrors(result.errors);
+        }
+      } catch (error) {
+        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
+        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
+      }
+    };
+
+    if (doConvert && standardizedTsvRows.length && !glQuotesTsvRows.length) {
+      if(checkboxStates.makeGLCols) {
+        doGLQuoteCols();
+      } else {
+        setGLQuotesTsvRows(standardizedTsvRows);
+      }
+    }
+  }, [doConvert, standardizedTsvRows, glQuotesTsvRows, checkboxStates.makeGLCols]);
 
   return (
     <AppContentContext.Provider
@@ -283,10 +371,16 @@ export const AppContentProvider = ({ children }) => {
         setShowOnlyConvertedRows,
         mergedTsvRows,
         setMergedTsvRows,
+        standardizedTsvRows,
+        setStandardizedTsvRows,
+        glQuotesTsvRows,
+        setGLQuotesTsvRows,
         showNotFound,
         setShowNotFound,
         showErrors,
         setShowErrors,
+        setCheckboxStates,
+        checkboxStates,
       }}
     >
       {children}
