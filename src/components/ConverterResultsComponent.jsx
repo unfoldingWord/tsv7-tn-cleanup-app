@@ -32,7 +32,7 @@ function ConverterResultsComponent() {
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND')).join('\n'));
+    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND') || row.include("Reference\tID")).join('\n'));
   };
 
   const failedCount = glQuotesTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;

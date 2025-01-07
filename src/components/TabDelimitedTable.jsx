@@ -19,11 +19,9 @@ const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
     const cells = row.split('\t');
     if (cells[1].trim()) {
         const tsvRowLength = tsvRows[0].split('\t').length;
-        console.log(cells.length, tsvRowLength);
         while (cells.length < tsvRowLength) {
           cells.splice(6, 0, '');
         }
-        console.log(cells);
         inputRowsByID.set(cells[1].trim(), cells);
     }
   });
@@ -59,7 +57,6 @@ const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
     });
     rows.push(rowObj);
   }
-  console.log(rows);
 
   return (
     <Box
@@ -77,7 +74,7 @@ const TabDelimitedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
       <table>
         <tbody style={{ margin: 0 }}>
           {rows.map((rowObj, rowIndex) =>
-            !showNotFound || rowObj.hasError ? (
+            !showNotFound || rowObj.hasError || rowObj.cells[0].content == "Reference" ? (
               <tr key={rowIndex}>
                 <td style={{ width: 1, color: 'grey', fontSize: '0.8em' }}>{rowIndex + 1}</td>
                 {rowObj.cells.map((cellObj, cellIndex) => (
