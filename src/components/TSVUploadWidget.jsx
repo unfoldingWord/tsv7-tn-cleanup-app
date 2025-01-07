@@ -7,7 +7,7 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 function TSVUploadWidget() {
-  const { selectedBook, selectedBranch, setInputTsvRows, setCheckboxStates, inputTsvRows, doConvert, setDoConvert, dcsURL, glQuotesTsvRows, checkboxStates } = useContext(AppContentContext);
+  const { selectedBook, selectedBranch, setInputTsvRows, setCheckboxStates, inputTsvRows, doConvert, setDoConvert, dcsURL, conversionDone, checkboxStates } = useContext(AppContentContext);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (event) => {
@@ -127,10 +127,11 @@ function TSVUploadWidget() {
         }}
       />
 
-      <FormGroup>
+      <FormGroup sx={{padding: 2}}>
         <FormControlLabel
           control={
             <Checkbox
+              sx={{ padding: 0, paddingRight: 1}}
               checked={checkboxStates.convertToGreekHebrew}
               onChange={handleCheckboxChange}
               name="convertToGreekHebrew"
@@ -141,6 +142,7 @@ function TSVUploadWidget() {
         <FormControlLabel
           control={
             <Checkbox
+              sx={{ padding: 0, paddingRight: 1}}
               checked={checkboxStates.standardizeQuotes}
               onChange={handleCheckboxChange}
               name="standardizeQuotes"
@@ -151,6 +153,7 @@ function TSVUploadWidget() {
         <FormControlLabel
           control={
             <Checkbox
+              sx={{ padding: 0, paddingRight: 1}}
               checked={checkboxStates.mergeWithDCS && !checkboxStates.makeGLCols}
               onChange={handleCheckboxChange}
               name="mergeWithDCS"
@@ -163,12 +166,24 @@ function TSVUploadWidget() {
         <FormControlLabel
           control={
             <Checkbox
+              sx={{ padding: 0, paddingRight: 1}}
               checked={checkboxStates.makeGLCols}
               onChange={handleCheckboxChange}
               name="makeGLCols"
             />
           }
           label="3. Create GL Quote and Occurrence columns with the English from the Quote field"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              sx={{ padding: 0, paddingRight: 1}}
+              checked={checkboxStates.replaceWithCurlyQuotes}
+              onChange={handleCheckboxChange}
+              name="replaceWithCurlyQuotes"
+            />
+          }
+          label={`4. Convert all single/double straight quotes (' ") to curly quotes (‘ ’ “ ”)`}
         />
       </FormGroup>
       <Button
@@ -190,7 +205,7 @@ function TSVUploadWidget() {
         }}
       >
         Convert
-        {doConvert && !glQuotesTsvRows.length ? (
+        {doConvert && !conversionDone ? (
           <>
             ing... <CircularProgress size={24} />
           </>

@@ -3,15 +3,16 @@ import { TextField, Checkbox, FormControlLabel, IconButton, Box } from '@mui/mat
 import { AppContentContext } from '../context/AppContentProvider';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
-import TabDelimitedTable from './TabDelimitedTable';
+import DiffHighlightedTable from './DiffHighlightedTable';
 
 function ConverterResultsComponent() {
   const {
     selectedBranch,
     selectedBook,
     inputTsvRows,
+    convertedTsvRows,
     mergedTsvRows,
-    glQuotesTsvRows,
+    conversionDone,
     errors,
     showOnlyConvertedRows,
     setShowOnlyConvertedRows,
@@ -32,17 +33,17 @@ function ConverterResultsComponent() {
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND') || row.include("Reference\tID")).join('\n'));
+    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND') || row.include("Reference\tID")).join('\n'));
   };
 
-  const failedCount = glQuotesTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;
+  const failedCount = convertedTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;
 
   return (
     <>
-      {glQuotesTsvRows.length ? (
+      {conversionDone ? (
         <Box sx={{ marginY: 2, padding: 1 }}>
           <div>
-            {glQuotesTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
+            {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
           {errors.length ? (
             <FormControlLabel control={<Checkbox checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} label="Show Errors" />
@@ -194,7 +195,7 @@ function ConverterResultsComponent() {
                 ) : null}
               </div>
             </div>
-            <TabDelimitedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : glQuotesTsvRows } inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
+            <DiffHighlightedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows } inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
           </div>
         </Box>
       ) : null}
