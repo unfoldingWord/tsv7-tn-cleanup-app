@@ -150,7 +150,6 @@ export const AppContentProvider = ({ children }) => {
     const standardizeQuotes = async () => {
       try {
         const result = await addGLQuoteCols(selectedBook, convertedTsvRows.join('\n'), dcsURL);
-        console.log(result);
         let result2;
         if (result.output.length) {
             const updatedRows = result.output.map((row, idx) => {
@@ -309,7 +308,6 @@ export const AppContentProvider = ({ children }) => {
     const doGLQuoteCols = async () => {
       try {
         const result = await addGLQuoteCols(selectedBook, convertedTsvRows.join('\n'), dcsURL);
-        console.log(result);
         if (result.output.length) {
           setConvertedTsvRows(result.output);
         } else {

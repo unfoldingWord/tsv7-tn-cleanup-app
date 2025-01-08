@@ -39,8 +39,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       tsv7-ult-quotes-to-origl-quotes:
-        specifier: ^1.0.41
-        version: 1.0.41(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
+        specifier: ^1.0.42
+        version: 1.0.42(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
@@ -3006,8 +3006,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.41:
-    resolution: {integrity: sha512-JFVd9cxbztCLVnqzebE12zcaKlxZtKVmlcjVIhW4TsQKzmA0yBHyfkRHQ426bOwku1S4dMe+BB4kuHAtDPj3fA==}
+  tsv7-ult-quotes-to-origl-quotes@1.0.42:
+    resolution: {integrity: sha512-m4C3givzfqHi58Gep4XYUyuveLHat5ggyl8xrDMU4aLy4sMWEqGUKuQM/c4NGt/148iyl2rFe2m43TUHciLANg==}
 
   tty-browserify@0.0.1:
     resolution: {integrity: sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==}
@@ -6694,7 +6694,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.41(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
+  tsv7-ult-quotes-to-origl-quotes@1.0.42(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
     dependencies:
       axios: 1.7.7
       buffer: 6.0.3
