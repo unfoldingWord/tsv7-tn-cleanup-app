@@ -1,7 +1,6 @@
 // Import the TabDelimitedTable component
 import React from 'react';
-import { Paper, Tooltip } from '@mui/material';
-import { styled } from '@mui/system';
+import { Paper, Tooltip, TextareaAutosize } from '@mui/material';
 import PropTypes from 'prop-types';
 
 import Table from '@mui/material/Table';
@@ -101,18 +100,21 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
                 <TableRow hover role="checkbox" tabIndex={-1} key={rowIdx}>
                   {row.cells.map((cell, cellIdx) => {
                     return (
-                      <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, width: cellIdx < (row.cells.length - 1) ? 400 : 2000, whiteSpace: cellIdx < (row.cells.length - 1) ? 'break-spaces' : 'no-wrap'}}>
-                      {cell.tooltip ? (
-                        <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} arrow>
-                          <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
-                            {cell.content}
-                          </span>
+                      <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < (row.cells.length - 1) ? 1 : 0, whiteSpace: 'break-spaces'}}>
+                        <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} disableHoverListener={!cell.tooltip} arrow>                          
+                          {cellIdx < (row.cells.length - 1) ? 
+                            <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
+                              {cell.content}
+                            </span> :
+                            <TextareaAutosize
+                              minRows={1}
+                              maxRows={3}
+                              width={400}
+                              style={{ width: 400, resize: 'both', overflow: 'auto', backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit' }}
+                              value={cell.content}
+                              readOnly
+                            />}
                         </Tooltip>
-                      ) : (
-                        <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
-                          {cell.content}
-                        </span>
-                      )}
                       </TableCell>
                     );
                   })}
