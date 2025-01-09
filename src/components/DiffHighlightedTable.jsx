@@ -1,16 +1,11 @@
-// Import the TabDelimitedTable component
-import React from 'react';
-import { Paper, Tooltip, TextareaAutosize } from '@mui/material';
+import React, { useState } from 'react';
+import { Paper, Tooltip, TextareaAutosize, Table, TableRow, TableCell, TableHead, TableContainer, TableBody, TablePagination } from '@mui/material';
 import PropTypes from 'prop-types';
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-
 const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 100;
+
   if (!tsvRows.length || !inputTsvRows.length) {
     return null;
   }
@@ -70,6 +65,12 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
     rows.push(rowObj);
   }
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const paginatedRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <Paper
       sx={{
@@ -95,35 +96,39 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.slice(1).map((row, rowIdx) => {
-              return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={rowIdx}>
-                  {row.cells.map((cell, cellIdx) => {
-                    return (
-                      <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < (row.cells.length - 1) ? 1 : 0, whiteSpace: 'break-spaces'}}>
-                        <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} disableHoverListener={!cell.tooltip} arrow>                          
-                          {cellIdx < (row.cells.length - 1) ? 
-                            <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
-                              {cell.content}
-                            </span> :
-                            <TextareaAutosize
-                              minRows={1}
-                              maxRows={3}
-                              width={400}
-                              style={{ width: 400, resize: 'both', overflow: 'auto', backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit' }}
-                              value={cell.content}
-                              readOnly
-                            />}
-                        </Tooltip>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+            {paginatedRows.map((row, rowIdx) => (
+              <TableRow hover role="checkbox" tabIndex={-1} key={rowIdx}>
+                {row.cells.map((cell, cellIdx) => (
+                  <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < (row.cells.length - 1) ? 1 : 0, whiteSpace: 'break-spaces' }}>
+                    <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} disableHoverListener={!cell.tooltip} arrow>
+                      {cellIdx < (row.cells.length - 1) ? 
+                        <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
+                          {cell.content}
+                        </span> :
+                        <TextareaAutosize
+                          minRows={1}
+                          maxRows={3}
+                          width={400}
+                          style={{ width: 400, resize: 'both', overflow: 'auto', backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit' }}
+                          value={cell.content}
+                          readOnly
+                        />}
+                    </Tooltip>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[200]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+      />
     </Paper>
   );
 };

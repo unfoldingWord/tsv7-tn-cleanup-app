@@ -343,6 +343,7 @@ export const AppContentProvider = ({ children }) => {
         for(const i in convertedTsvRows) {
           newRows.push(replaceWithCurlyQuotes(convertedTsvRows[i]));
         }
+        console.log(newRows);
         setConvertedTsvRows(newRows);
         if (mergedTsvRows.length) {
           const newRows = [];
@@ -352,6 +353,7 @@ export const AppContentProvider = ({ children }) => {
           setMergedTsvRows(newRows);
         }
       }
+      console.log("HERE!")
       setConversionStage(prev => prev + 1);
       setConversionDone(true);
     }
