@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Paper, Tooltip, TextareaAutosize, Table, TableRow, TableCell, TableHead, TableContainer, TableBody, TablePagination } from '@mui/material';
 import PropTypes from 'prop-types';
 
@@ -69,7 +69,11 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
     setPage(newPage);
   };
 
-  const paginatedRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  if (page * rowsPerPage > rows.length) {
+    setPage(0);
+  }
+
+  const paginatedRows = rows.slice(1).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Paper
