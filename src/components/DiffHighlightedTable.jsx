@@ -88,6 +88,25 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
         maxHeight: '500px',
       }}
     >
+      <TablePagination
+        rowsPerPageOptions={[200]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        sx={{
+          '& .MuiTablePagination-toolbar': {
+            minHeight: '36px',
+            padding: '0px',
+          },
+          '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+            marginTop: '0px',
+            marginBottom: '0px',
+            padding: '0px',
+          },
+        }}
+      />
       <TableContainer sx={{ width: '100%', maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table" sx={{ width: '100%' }}>
           <TableHead>
@@ -132,6 +151,15 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
+        sx={{
+          '& .MuiTablePagination-toolbar': {
+            minHeight: '36px',
+          },
+          '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+            marginTop: '0px',
+            marginBottom: '0px',
+          },
+        }}
       />
     </Paper>
   );
