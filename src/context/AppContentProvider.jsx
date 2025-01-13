@@ -8,12 +8,13 @@ const replaceWithCurlyQuotes = (row) => {
     return row;
   }
   let cols = row.split('\t');
+  let ref = cols.shift().replaceAll('–', '-');
   let note = cols.pop().replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
     .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's'
     .replace(/'/g, '‘') // Left single quote
     .replace(/(\W|^)"(\S)/g, '$1“$2') // Left double quote
     .replace(/(\S)"(\W|$)/g, '$1”$2'); // Right double quote
-  return [...cols, note].join('\t');
+  return [ref, ...cols, note].join('\t');
 };
 
 const getUniqueID = (ids) => {
@@ -115,6 +116,9 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const doUlt2OL = async () => {
       try {
+        if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
+          inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
+        }
         const result = await convertULTQuotes2OL(selectedBook, inputTsvRows.join('\n'), dcsURL);
         if (result.output.length) {
           setConvertedTsvRows(result.output);
@@ -134,16 +138,19 @@ export const AppContentProvider = ({ children }) => {
 
     if (doConvert && conversionStage === 1 && !convertedTsvRows.length) {
       console.log("At stage 1");
-      if (checkboxStates.convertToGreekHebrew) {
-        console.log("Doing stage 1");
-        doUlt2OL();
-      } else {
-        console.log("Skipping stage 1");
-        setConvertedTsvRows(inputTsvRows);
-        setConversionStage(prev => prev + 1);
-      }
+        if (checkboxStates.convertToGreekHebrew) {
+          console.log("Doing stage 1");
+          doUlt2OL();
+        } else {
+          console.log("Skipping stage 1");
+          if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
+            inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
+          }
+          setConvertedTsvRows(inputTsvRows);
+          setConversionStage(prev => prev + 1);
+        }
     }
-  }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.convertToGreekHebrew]);
+  }, [doConvert, inputTsvRows, convertedTsvRows, conversionStage, checkboxStates.convertToGreekHebrew]);
 
   // Conversion Stage 2: Standardize quotes
   useEffect(() => {
@@ -263,10 +270,10 @@ export const AppContentProvider = ({ children }) => {
             if (bVerse === 'intro') return 1;
             if (typeof aVerse === 'number') aVerse = `${aVerse}-${aVerse}`;
             if (typeof bVerse === 'number') bVerse = `${bVerse}-${bVerse}`;
-            const aVerses = aVerse.split(/[-,]/).map(Number);
-            const bVerses = bVerse.split(/[-,]/).map(Number);
+            const aVerses = aVerse.split(/[-–,]/).map(Number);
+            const bVerses = bVerse.split(/[-–,]/).map(Number);
             if (aVerses[0] && bVerses[0]) {
-              if (aVerses[0] === bVerses[0]) {
+              if (aVerses[0] == bVerses[0]) {
                 return aVerses[1] - bVerses[1];
               }
               return aVerses[0] - bVerses[0];
@@ -343,7 +350,6 @@ export const AppContentProvider = ({ children }) => {
         for(const i in convertedTsvRows) {
           newRows.push(replaceWithCurlyQuotes(convertedTsvRows[i]));
         }
-        console.log(newRows);
         setConvertedTsvRows(newRows);
         if (mergedTsvRows.length) {
           const newRows = [];

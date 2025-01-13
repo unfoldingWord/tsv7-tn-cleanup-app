@@ -16,6 +16,7 @@ function TSVUploadWidget() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setInputTsvRows(e.target.result.split('\n').filter((row) => row.trim()));
+        document.getElementById('inputTsv').value = e.target.result;
       };
       reader.readAsText(file);
     }
@@ -29,6 +30,7 @@ function TSVUploadWidget() {
     try {
       const text = await navigator.clipboard.readText();
       setInputTsvRows(text.split('\n').filter((row) => row.trim()));
+      document.getElementById('inputTsv').value = text;
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
     }
@@ -39,6 +41,7 @@ function TSVUploadWidget() {
       const response = await fetch(`${dcsURL}/unfoldingWord/en_tn/raw/branch/${selectedBranch}/tn_${selectedBook.toUpperCase()}.tsv`);
       const text = await response.text();
       setInputTsvRows(text.split('\n').filter((row) => row.trim()));
+      document.getElementById('inputTsv').value = text;
     } catch (err) {
       console.error('Failed to fetch TSV content from DCS:', err);
     }
@@ -54,6 +57,8 @@ function TSVUploadWidget() {
       return newState;
     });
   };
+
+  console.log("RERENDERING");
 
   return (
     <Box
@@ -109,14 +114,16 @@ function TSVUploadWidget() {
       </Typography>
       <input type="file" accept=".tsv,.csv,.rtf,.txt" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
       <TextField
+        id="inputTsv"
         multiline
         rows={10}
         variant="outlined"
         fullWidth
-        value={inputTsvRows.join('\n')}
-        onChange={(e) => setInputTsvRows(e.target.value.split('\n').filter((row) => row.trim()))}
+        defaultValue={inputTsvRows.join('\n')}
+        onBlur={(e) => setInputTsvRows(e.target.value.split('\n').filter((row) => row.trim()))}
         label="Your Translation Notes TSV content with ULT quotes"
-        placeholder="TSV content will appear here..."
+        placeholder=""
+        slotProps={{ inputLabel: {shrink: true} }}
         sx={{
           marginTop: 2,
           resize: 'both',

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Paper, Tooltip, TextareaAutosize, Table, TableRow, TableCell, TableHead, TableContainer, TableBody, TablePagination } from '@mui/material';
+import React, { useState } from 'react';
+import { Paper, Tooltip, TextareaAutosize, Table, TableRow, TableCell, TableHead, TableContainer, TableBody, TablePagination, Select, MenuItem } from '@mui/material';
 import PropTypes from 'prop-types';
 
 const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
@@ -75,6 +75,19 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
 
   const paginatedRows = rows.slice(1).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+  const handlePageInputChange = (event) => {
+    const newPage = parseInt(event.target.value, 10) - 1;
+    if (!isNaN(newPage) && newPage >= 0 && newPage < Math.ceil(rows.length / rowsPerPage)) {
+      setPage(newPage);
+    }
+  };
+
+  const handlePageInputKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handlePageInputChange(event);
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -88,25 +101,47 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
         maxHeight: '500px',
       }}
     >
-      <TablePagination
-        rowsPerPageOptions={[200]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        sx={{
-          '& .MuiTablePagination-toolbar': {
-            minHeight: '36px',
-            padding: '0px',
-          },
-          '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-            marginTop: '0px',
-            marginBottom: '0px',
-            padding: '0px',
-          },
-        }}
-      />
+
+<TablePagination
+  component="div"
+  count={rows.length}
+  rowsPerPage={rowsPerPage}
+  rowsPerPageOptions={[rowsPerPage]}
+  page={page}
+  onPageChange={handleChangePage}
+  ActionsComponent={(subProps) => {
+    const {
+      page,
+    } = subProps;
+    return (
+      <>
+        {', '}Page: <Select
+          size="small"
+          onChange={(e) => handleChangePage(e, e.target.value)}
+          value={page}
+          MenuProps={{
+            PaperProps: { sx: { maxHeight: 360 } }
+          }}
+          >
+            {[...Array(Math.ceil(rows.length / rowsPerPage)).keys()].map((pageNum) => (
+              <MenuItem key={pageNum} value={pageNum}>
+                {pageNum + 1}
+              </MenuItem>
+            ))}
+         </Select>
+      </>
+    );
+  }}
+  sx={{
+    '& .MuiTablePagination-toolbar': {
+      minHeight: '36px',
+    },
+    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+      marginTop: '0px',
+      marginBottom: '0px',
+    },
+  }}
+/>
       <TableContainer sx={{ width: '100%', maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table" sx={{ width: '100%' }}>
           <TableHead>
