@@ -58,8 +58,6 @@ function TSVUploadWidget() {
     });
   };
 
-  console.log("RERENDERING");
-
   return (
     <Box
       sx={{

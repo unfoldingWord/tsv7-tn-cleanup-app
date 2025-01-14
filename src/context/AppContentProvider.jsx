@@ -360,7 +360,6 @@ export const AppContentProvider = ({ children }) => {
           setMergedTsvRows(newRows);
         }
       }
-      console.log("HERE!")
       setConversionStage(prev => prev + 1);
       setConversionDone(true);
     }

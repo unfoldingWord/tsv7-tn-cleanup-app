@@ -129,6 +129,7 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
               </MenuItem>
             ))}
          </Select>
+         {' of '}{Math.ceil(rows.length / rowsPerPage)}
       </>
     );
   }}
