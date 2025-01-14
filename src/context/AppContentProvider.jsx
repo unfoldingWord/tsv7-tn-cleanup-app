@@ -19,8 +19,9 @@ const replaceWithCurlyQuotes = (row) => {
 
 const getUniqueID = (ids) => {
   let newID;
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
   do {
-    newID = Math.random().toString(36).substring(2, 6);
+    newID = alphabet.charAt(Math.floor(Math.random() * alphabet.length)) + Math.random().toString(36).substring(2, 5);
   } while (ids.has(newID));
   return newID;
 };
@@ -242,7 +243,7 @@ export const AppContentProvider = ({ children }) => {
           allTsvMap.set(ref, []);
           convertedRefs.add(ref);
         }
-        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && !convertedTsvIDs.has(id)) {
+        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && !id.match(/^\d/) && !convertedTsvIDs.has(id)) {
           allTsvMap.get(ref).push(row);
         } else {
           const ids = new Set([...idToRefMap.keys(), ...convertedTsvIDs]);
