@@ -168,6 +168,8 @@ export const AppContentProvider = ({ children }) => {
               }
               return [...columns.slice(0, 6), columns[8]].join('\t');
             });
+          console.log(updatedRows);
+          console.log(selectedBook, dcsURL);
           result2 = await convertULTQuotes2OL(selectedBook, updatedRows.join('\n'), dcsURL);
           if (result2.output.length) {
             const rows = result2.output;
