@@ -46,6 +46,7 @@ export const AppContentProvider = ({ children }) => {
   const [showErrors, setShowErrors] = useState(false);
   const [doNotPromptAgain, setDoNotPromptAgain] = useState(false);
   const [showOnlyConvertedRows, setShowOnlyConvertedRows] = useState(false);
+  const [showOnlyChangedRows, setShowOnlyChangedRows] = useState(false);
   const [checkboxStates, setCheckboxStates] = useState({
     convertToGreekHebrew: true,
     standardizeQuotes: false,
@@ -109,6 +110,7 @@ export const AppContentProvider = ({ children }) => {
     setConversionDone(false);
     setErrors([]);
     setShowOnlyConvertedRows(false);
+    setShowOnlyChangedRows(false);
     setShowNotFound(false);
     setDoNotPromptAgain(false);
   }, [selectedBook, inputTsvRows, checkboxStates]);
@@ -236,16 +238,16 @@ export const AppContentProvider = ({ children }) => {
 
       const convertedRefs = new Set();
       const convertedTsvIDs = new Set();
+      const newConvertedTsvRows = [];
       convertedTsvRows.forEach((row) => {
         const columns = row.split('\t');
         if (columns.length < 2 || columns[0] === 'Reference') return;
         let [ref, id] = columns;
-        if (ref === 'Reference') return;
         if (!convertedRefs.has(ref)) {
           allTsvMap.set(ref, []);
           convertedRefs.add(ref);
         }
-        if ((!idToRefMap.has(id) || idToRefMap.get(id) == ref) && !id.match(/^\d/) && !convertedTsvIDs.has(id)) {
+        if ((!idToRefMap.has(id) || idToRefMap.get(id) === ref) && !id.match(/^\d/) && !convertedTsvIDs.has(id)) {
           allTsvMap.get(ref).push(row);
         } else {
           const ids = new Set([...idToRefMap.keys(), ...convertedTsvIDs]);
@@ -254,6 +256,7 @@ export const AppContentProvider = ({ children }) => {
           allTsvMap.get(ref).push(newRow);
         }
         convertedTsvIDs.add(id);
+        newConvertedTsvRows.push([ref, id, ...columns.slice(2)].join('\t'));
       });
 
       const allReferences = Array.from(allTsvMap.keys()).sort((a, b) => {
@@ -303,6 +306,7 @@ export const AppContentProvider = ({ children }) => {
         });
       });
 
+      setConvertedTsvRows(newConvertedTsvRows);
       setMergedTsvRows(mergedRows);
       setConversionStage(prev => prev + 1);
     };
@@ -374,7 +378,7 @@ export const AppContentProvider = ({ children }) => {
       const userConfirmed = window.confirm(
         `Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${
           selectedBranch == 'master' ? '\n\nNote: Before commiting changes, select the create branch option and change "patch" to "tc-create", e.g.: richmahn-tc-create-1' : ''
-        }\n\nA nnew windows for DCS will open if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`
+        }\n\nA new windows for DCS will open if you click "Ok". Click "Cancel" if you want to first review the conversion results. You can then "Paste into DCS Editor" when you are ready which opens in a new window.`
       );
       if (userConfirmed) {
         const mergedContent = mergedTsvRows.join('\n');
@@ -410,6 +414,8 @@ export const AppContentProvider = ({ children }) => {
         setErrors,
         showOnlyConvertedRows,
         setShowOnlyConvertedRows,
+        showOnlyChangedRows,
+        setShowOnlyChangedRows,
         mergedTsvRows,
         setMergedTsvRows,
         conversionDone,

@@ -45,8 +45,8 @@ importers:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tsv7-ult-quotes-to-origl-quotes:
-        specifier: ^1.0.53
-        version: 1.0.53(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
+        specifier: ^1.0.55
+        version: 1.0.55(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
@@ -2900,6 +2900,9 @@ packages:
   stream@0.0.2:
     resolution: {integrity: sha512-gCq3NDI2P35B2n6t76YJuOp7d6cN/C7Rt0577l91wllh0sY9ZBuw9KaSGqH/b0hzn3CWWJbpbW0W0WvQ1H/Q7g==}
 
+  string-punctuation-tokenizer@2.2.0:
+    resolution: {integrity: sha512-QOTErphviG7wtzhM6A0tVZugwPtfHFNySboO0SEkruFwW/d2HHalSHWri4230HG/F6egvJx76kZdtYY359+rrA==}
+
   string.prototype.matchall@4.0.11:
     resolution: {integrity: sha512-NUdh0aDavY2og7IbBPenWqR9exH+E26Sv8e0/eTe1tltDGZL+GtBkDAnnyBtmekfK6/Dq3MkcGtzXFEd1LQrtg==}
     engines: {node: '>= 0.4'}
@@ -3035,8 +3038,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.53:
-    resolution: {integrity: sha512-WAgTX7f7a9FKRxUN8+RCSSzvjZZNNMVYYw2vYAa3Dc6TmUV4Zj3sONZiiViNGoz1GUbkk7PK3gFyDy5C2g4z9w==}
+  tsv7-ult-quotes-to-origl-quotes@1.0.55:
+    resolution: {integrity: sha512-/NPOy3hcEtgmULGzm+KVDeCBPQrkBAf/4KMSwusE7b+pbGmpf9U5me+HfpUszfmz+bQujlsgjmsW0Pr6u3f4zw==}
 
   tty-browserify@0.0.1:
     resolution: {integrity: sha512-C3TaO7K81YvjCgQH9Q1S3R3P3BtN3RIM8n+OvX4il1K1zgE8ZhI0op7kClgkxtutIE8hQrcrHBXvIheqKUUCxw==}
@@ -3257,6 +3260,9 @@ packages:
 
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
+
+  xregexp@4.4.1:
+    resolution: {integrity: sha512-2u9HwfadaJaY9zHtRRnH6BY6CQVNQKkYm3oLtC9gJXXzfsbACg5X5e4EZZGVAH+YIfa+QA9lsFQTTe3HURF3ag==}
 
   xregexp@5.1.1:
     resolution: {integrity: sha512-fKXeVorD+CzWvFs7VBuKTYIW63YD1e1osxwQ8caZ6o1jg6pDAbABDG54LCIq0j5cy7PjRvGIq6sef9DYPXpncg==}
@@ -6610,6 +6616,10 @@ snapshots:
     dependencies:
       emitter-component: 1.1.2
 
+  string-punctuation-tokenizer@2.2.0:
+    dependencies:
+      xregexp: 4.4.1
+
   string.prototype.matchall@4.0.11:
     dependencies:
       call-bind: 1.0.7
@@ -6747,12 +6757,13 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsv7-ult-quotes-to-origl-quotes@1.0.53(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
+  tsv7-ult-quotes-to-origl-quotes@1.0.55(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5)):
     dependencies:
       axios: 1.7.7
       buffer: 6.0.3
       deepcopy: 2.1.0
       proskomma: 0.9.3(eslint@9.12.0)(webpack@5.95.0(esbuild@0.21.5))
+      string-punctuation-tokenizer: 2.2.0
       xregexp: 5.1.1
     transitivePeerDependencies:
       - debug
@@ -6998,6 +7009,10 @@ snapshots:
   ws@8.18.0: {}
 
   xmlchars@2.2.0: {}
+
+  xregexp@4.4.1:
+    dependencies:
+      '@babel/runtime-corejs3': 7.25.7
 
   xregexp@5.1.1:
     dependencies:
