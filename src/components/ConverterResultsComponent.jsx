@@ -195,7 +195,7 @@ function ConverterResultsComponent() {
                 ) : null}
               </div>
             </div>
-            <DiffHighlightedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows } inputTsvRows={inputTsvRows} showNotFound={showNotFound} />
+            <DiffHighlightedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows } inputTsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? convertedTsvRows : inputTsvRows} showNotFound={showNotFound} />
           </div>
         </Box>
       ) : null}

@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { convertULTQuotes2OL, addGLQuoteCols } from 'tsv7-ult-quotes-to-origl-quotes';
+import { convertGLQuotes2OLQuotes, addGLQuoteCols } from 'tsv-quote-converters';
 import { BibleBookData } from '../common/books';
 
 const replaceWithCurlyQuotes = (row) => {
-  if (!row) {
+  if (!row.trim()) {
     return row;
   }
   let cols = row.split('\t');
@@ -122,9 +122,9 @@ export const AppContentProvider = ({ children }) => {
         if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
           inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
         }
-        const result = await convertULTQuotes2OL(selectedBook, inputTsvRows.join('\n'), dcsURL);
+        const result = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: inputTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
         if (result.output.length) {
-          setConvertedTsvRows(result.output);
+          setConvertedTsvRows(result.output.split("\n"));
           setConversionStage(prev => prev + 1);
         } else {
           setConversionDone(true);
@@ -159,22 +159,23 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const standardizeQuotes = async () => {
       try {
-        const result = await addGLQuoteCols(selectedBook, convertedTsvRows.join('\n'), dcsURL);
+        const result = await addGLQuoteCols({bibleLinks: ['unfoldingWord/en_ult/master'], bookCode: selectedBook, tsvContent: convertedTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
         let result2;
         if (result.output.length) {
-            const updatedRows = result.output.map((row, idx) => {
-              const columns = row.split('\t');
-              if (idx !== 0 && columns[6] && columns[6] !== 'QUOTE_NOT_FOUND') {
-                columns[4] = columns[6];
-                columns[5] = columns[7];
+            const updatedRows = result.output.split("\n").map((row, idx) => {
+              if (row.trim()) {
+                const columns = row.split('\t');
+                if (idx !== 0 && columns[6] && columns[6] !== 'QUOTE_NOT_FOUND') {
+                  columns[4] = columns[6];
+                  columns[5] = columns[7];
+                }
+                row = [...columns.slice(0, 6), columns[8]].join('\t');
               }
-              return [...columns.slice(0, 6), columns[8]].join('\t');
+              return row;
             });
-          console.log(updatedRows);
-          console.log(selectedBook, dcsURL);
-          result2 = await convertULTQuotes2OL(selectedBook, updatedRows.join('\n'), dcsURL);
+          result2 = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: updatedRows.join('\n'), dcsURL});
           if (result2.output.length) {
-            const rows = result2.output;
+            const rows = result2.output.split("\n");
             setConvertedTsvRows(rows);
             setConversionStage(prev => prev + 1);
           } else {
@@ -240,6 +241,7 @@ export const AppContentProvider = ({ children }) => {
       const convertedTsvIDs = new Set();
       const newConvertedTsvRows = [];
       convertedTsvRows.forEach((row) => {
+        if (!row.trim()) return;
         const columns = row.split('\t');
         if (columns.length < 2 || columns[0] === 'Reference') return;
         let [ref, id] = columns;
@@ -321,9 +323,9 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const doGLQuoteCols = async () => {
       try {
-        const result = await addGLQuoteCols(selectedBook, convertedTsvRows.join('\n'), dcsURL);
+        const result = await addGLQuoteCols({bibleLinks: ['unfoldingWord/en_ult/master'], bookCode: selectedBook, tsvContent: convertedTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
         if (result.output.length) {
-          setConvertedTsvRows(result.output);
+          setConvertedTsvRows(result.output.split("\n"));
         } else {
           setConversionDone(true);
         }

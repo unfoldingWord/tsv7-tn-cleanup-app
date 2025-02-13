@@ -52,7 +52,7 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
         cellObj.highlight = 'error';
         rowObj.hasError = true;
       }
-      if (inputRowsByID.has(tsvCells[1])) {
+      if (inputRowsByID.has(tsvCells[1]) && inputRowsByID.get(tsvCells[1])[0] === tsvCells[0]) {
         const inputCells = inputRowsByID.get(tsvCells[1]);
         if (inputCells[cellIndex] !== cell) {
           cellObj.highlight = cellObj.highlight || 'difference';
