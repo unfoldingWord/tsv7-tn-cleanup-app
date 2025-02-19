@@ -1,7 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import Papa from 'papaparse';
 import { convertGLQuotes2OLQuotes, addGLQuoteCols } from 'tsv-quote-converters';
 import { BibleBookData } from '../common/books';
+
+// Remove the parseTsv helper function as we'll use Papaparse instead
 
 const replaceWithCurlyQuotes = (row) => {
   if (!row.trim()) {
@@ -10,7 +13,7 @@ const replaceWithCurlyQuotes = (row) => {
   let cols = row.split('\t');
   let ref = cols.shift().replaceAll('–', '-');
   let note = cols.pop().replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
-    .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's'
+    .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's' 
     .replace(/'/g, '‘') // Left single quote
     .replace(/(\W|^)"(\S)/g, '$1“$2') // Left double quote
     .replace(/(\S)"(\W|$)/g, '$1”$2'); // Right double quote
@@ -162,18 +165,26 @@ export const AppContentProvider = ({ children }) => {
         const result = await addGLQuoteCols({bibleLinks: ['unfoldingWord/en_ult/master'], bookCode: selectedBook, tsvContent: convertedTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
         let result2;
         if (result.output.length) {
-            const updatedRows = result.output.split("\n").map((row, idx) => {
-              if (row.trim()) {
-                const columns = row.split('\t');
-                if (idx !== 0 && columns[6] && columns[6] !== 'QUOTE_NOT_FOUND') {
-                  columns[4] = columns[6];
-                  columns[5] = columns[7];
-                }
-                row = [...columns.slice(0, 6), columns[8]].join('\t');
-              }
-              return row;
-            });
-          result2 = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: updatedRows.join('\n'), dcsURL});
+          let tsvRecords = Papa.parse(result.output, {
+            header: true,
+            delimiter: '\t',
+            quotes: '',
+            skipEmptyLines: true
+          }).data;
+          
+          tsvRecords.forEach((rec) => {
+            rec['Quote'] = rec['GLQuote']; 
+            rec['Occurrence'] = rec['GLOccurrence']
+          });
+
+          const outputTsv = Papa.unparse(tsvRecords, {
+            delimiter: '\t',
+            header: true,
+            quotes: '',
+            columns: convertedTsvRows[0].split('\t')
+          });
+
+          let result2 = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: outputTsv, dcsURL});
           if (result2.output.length) {
             const rows = result2.output.split("\n");
             setConvertedTsvRows(rows);
@@ -184,11 +195,7 @@ export const AppContentProvider = ({ children }) => {
         } else {
           setConversionDone(true);
         }
-        if (result.errors.length) {
-          setErrors(result.errors);
-        } else if (result2.errors.length) {
-          setErrors(result2.errors);
-        }
+        setErrors([...result.errors, ...result2.errors]);
       } catch (error) {
         setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
         console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);

@@ -26,6 +26,15 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
+      csv-parse:
+        specifier: ^5.6.0
+        version: 5.6.0
+      csv-stringify:
+        specifier: ^6.5.2
+        version: 6.5.2
+      cvs-parse:
+        specifier: link:cvs-parse
+        version: link:cvs-parse
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1
@@ -45,12 +54,15 @@ importers:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tsv-quote-converters:
-        specifier: ^1.1.2
-        version: 1.1.2(@babel/core@7.25.7)
+        specifier: ^1.1.4
+        version: 1.1.4(@babel/core@7.25.7)
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
         version: 9.12.0
+      '@rollup/plugin-inject':
+        specifier: ^5.0.5
+        version: 5.0.5(rollup@4.24.0)
       '@storybook/addon-docs':
         specifier: ^8.3.5
         version: 8.3.5(storybook@8.3.5)(webpack-sources@3.2.3)
@@ -72,6 +84,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.2
         version: 4.3.2(vite@5.4.8(@types/node@22.7.4)(terser@5.31.3))
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       eslint:
         specifier: ^9.12.0
         version: 9.12.0
@@ -84,6 +99,9 @@ importers:
       globals:
         specifier: ^15.11.0
         version: 15.11.0
+      process:
+        specifier: ^0.11.10
+        version: 0.11.10
       vite:
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.4)(terser@5.31.3)
@@ -1072,6 +1090,15 @@ packages:
 
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
+
+  '@rollup/plugin-inject@5.0.5':
+    resolution: {integrity: sha512-2+DEJbNBoPROPkgTDNe8/1YXWcqxbN5DTjASVIOx8HS+pITXushyNiBV56RB08zuptzz8gT3YfkqriTBVycepg==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
 
   '@rollup/pluginutils@5.1.2':
     resolution: {integrity: sha512-/FIdS3PyZ39bjZlwqFnWqCOVnW7o963LtKMwQOD0NhQqw22gSr2YY1afu3FxRip4ZCZNsD5jq6Aaz6QV3D/Njw==}
@@ -3092,8 +3119,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsv-quote-converters@1.1.2:
-    resolution: {integrity: sha512-uY4NbFHxQ9SLSOKMQCtbNqK7v9MbQNz9oXBc32MRrs5QFCOofwzkyE/Yjb8U8pHINboIr84UeDS4EEv07i1hhA==}
+  tsv-quote-converters@1.1.4:
+    resolution: {integrity: sha512-PUOagPtw1uN7ps//i1IjfFewDUrIKi9hmOCPhpvsynwO+CcXBKr0VowWgj0SQ9sGCp0JOlhlZh03dJotuJu62w==}
 
   tween-functions@1.2.0:
     resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==}
@@ -4432,6 +4459,14 @@ snapshots:
       '@types/react': 18.3.3
 
   '@popperjs/core@2.11.8': {}
+
+  '@rollup/plugin-inject@5.0.5(rollup@4.24.0)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.2(rollup@4.24.0)
+      estree-walker: 2.0.2
+      magic-string: 0.30.11
+    optionalDependencies:
+      rollup: 4.24.0
 
   '@rollup/pluginutils@5.1.2(rollup@4.24.0)':
     dependencies:
@@ -6813,7 +6848,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsv-quote-converters@1.1.2(@babel/core@7.25.7):
+  tsv-quote-converters@1.1.4(@babel/core@7.25.7):
     dependencies:
       axios: 1.7.7
       buffer: 6.0.3
