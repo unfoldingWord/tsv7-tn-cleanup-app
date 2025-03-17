@@ -181,6 +181,7 @@ export const AppContentProvider = ({ children }) => {
             delimiter: '\t',
             header: true,
             quotes: '',
+            newline: "\n",
             columns: convertedTsvRows[0].split('\t')
           });
 
