@@ -54,8 +54,8 @@ importers:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tsv-quote-converters:
-        specifier: ^1.1.4
-        version: 1.1.4(@babel/core@7.25.7)
+        specifier: ^1.1.5
+        version: 1.1.5(@babel/core@7.25.7)
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
@@ -3119,8 +3119,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsv-quote-converters@1.1.4:
-    resolution: {integrity: sha512-PUOagPtw1uN7ps//i1IjfFewDUrIKi9hmOCPhpvsynwO+CcXBKr0VowWgj0SQ9sGCp0JOlhlZh03dJotuJu62w==}
+  tsv-quote-converters@1.1.5:
+    resolution: {integrity: sha512-L/WvidOhcWeCzf0R6bZ4/dmnFxFYPeJHi/M/KqyZRpJg0RfwKnNTLszbQpXCqJziAyC8rkbEjK1lpW5O1hpPCA==}
 
   tween-functions@1.2.0:
     resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==}
@@ -6848,7 +6848,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsv-quote-converters@1.1.4(@babel/core@7.25.7):
+  tsv-quote-converters@1.1.5(@babel/core@7.25.7):
     dependencies:
       axios: 1.7.7
       buffer: 6.0.3
