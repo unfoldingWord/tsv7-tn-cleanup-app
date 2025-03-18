@@ -12,8 +12,10 @@ const replaceWithCurlyQuotes = (row) => {
   }
   let cols = row.split('\t');
   let ref = cols.shift().replaceAll('–', '-');
-  let note = cols.pop().replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
-    .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's' 
+  let note = cols
+    .pop()
+    .replace(/(\w)'(\w)/g, '$1’$2') // Apostrophe between letters
+    .replace(/(\w)'(s\b)/g, '$1’$2') // Apostrophe after 's'
     .replace(/'/g, '‘') // Left single quote
     .replace(/(\W|^)"(\S)/g, '$1“$2') // Left double quote
     .replace(/(\S)"(\W|$)/g, '$1”$2'); // Right double quote
@@ -55,7 +57,7 @@ export const AppContentProvider = ({ children }) => {
     standardizeQuotes: false,
     replaceWithCurlyQuotes: true,
     makeGLCols: false,
-    mergeWithDCS: true,    
+    mergeWithDCS: true,
   });
 
   // useEffect(() => {
@@ -107,16 +109,19 @@ export const AppContentProvider = ({ children }) => {
 
   useEffect(() => {
     setDoConvert(false);
+  }, [selectedBook, inputTsvRows, checkboxStates]);
+
+  useEffect(() => {
+    setConversionStage(1);
     setConvertedTsvRows([]);
     setMergedTsvRows([]);
-    setConversionStage(1);
     setConversionDone(false);
     setErrors([]);
     setShowOnlyConvertedRows(false);
     setShowOnlyChangedRows(false);
     setShowNotFound(false);
     setDoNotPromptAgain(false);
-  }, [selectedBook, inputTsvRows, checkboxStates]);
+  }, [doConvert]);
 
   // Conversion Stage 1: Convert ULT quotes to OL quotes
   useEffect(() => {
@@ -125,10 +130,16 @@ export const AppContentProvider = ({ children }) => {
         if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
           inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
         }
-        const result = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: inputTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
+        const result = await convertGLQuotes2OLQuotes({
+          bibleLink: 'unfoldingWord/en_ult/master',
+          bookCode: selectedBook,
+          tsvContent: inputTsvRows.join('\n'),
+          trySeparatorsAndOccurrences: true,
+          dcsURL,
+        });
         if (result.output.length) {
-          setConvertedTsvRows(result.output.split("\n"));
-          setConversionStage(prev => prev + 1);
+          setConvertedTsvRows(result.output.split('\n'));
+          setConversionStage((prev) => prev + 1);
         } else {
           setConversionDone(true);
         }
@@ -143,18 +154,18 @@ export const AppContentProvider = ({ children }) => {
     };
 
     if (doConvert && conversionStage === 1 && !convertedTsvRows.length) {
-      console.log("At stage 1");
-        if (checkboxStates.convertToGreekHebrew) {
-          console.log("Doing stage 1");
-          doUlt2OL();
-        } else {
-          console.log("Skipping stage 1");
-          if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
-            inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
-          }
-          setConvertedTsvRows(inputTsvRows);
-          setConversionStage(prev => prev + 1);
+      console.log('At stage 1');
+      if (checkboxStates.convertToGreekHebrew) {
+        console.log('Doing stage 1');
+        doUlt2OL();
+      } else {
+        console.log('Skipping stage 1');
+        if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
+          inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
         }
+        setConvertedTsvRows(inputTsvRows);
+        setConversionStage((prev) => prev + 1);
+      }
     }
   }, [doConvert, inputTsvRows, convertedTsvRows, conversionStage, checkboxStates.convertToGreekHebrew]);
 
@@ -162,34 +173,42 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const standardizeQuotes = async () => {
       try {
-        const result = await addGLQuoteCols({bibleLinks: ['unfoldingWord/en_ult/master'], bookCode: selectedBook, tsvContent: convertedTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
+        const result = await addGLQuoteCols({
+          bibleLinks: ['unfoldingWord/en_ult/master'],
+          bookCode: selectedBook,
+          tsvContent: convertedTsvRows.join('\n'),
+          trySeparatorsAndOccurrences: true,
+          dcsURL,
+        });
         let result2;
         if (result.output.length) {
           let tsvRecords = Papa.parse(result.output, {
             header: true,
             delimiter: '\t',
             quotes: '',
-            skipEmptyLines: true
+            skipEmptyLines: true,
           }).data;
-          
+
           tsvRecords.forEach((rec) => {
-            rec['Quote'] = rec['GLQuote']; 
-            rec['Occurrence'] = rec['GLOccurrence']
+            rec['Quote'] = rec['GLQuote'];
+            rec['Occurrence'] = rec['GLOccurrence'];
           });
 
           const outputTsv = Papa.unparse(tsvRecords, {
             delimiter: '\t',
             header: true,
             quotes: '',
-            newline: "\n",
-            columns: convertedTsvRows[0].split('\t')
+            newline: '\n',
+            columns: convertedTsvRows[0].split('\t'),
           });
 
-          let result2 = await convertGLQuotes2OLQuotes({bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: outputTsv, dcsURL});
+          console.log('outputTsv', outputTsv);
+
+          let result2 = await convertGLQuotes2OLQuotes({ bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: outputTsv, dcsURL });
           if (result2.output.length) {
-            const rows = result2.output.split("\n");
+            const rows = result2.output.split('\n');
             setConvertedTsvRows(rows);
-            setConversionStage(prev => prev + 1);
+            setConversionStage((prev) => prev + 1);
           } else {
             setConversionDone(true);
           }
@@ -203,13 +222,13 @@ export const AppContentProvider = ({ children }) => {
       }
     };
 
-    if(doConvert && conversionStage === 2 && convertedTsvRows.length) {
+    if (doConvert && conversionStage === 2 && convertedTsvRows.length) {
       if (checkboxStates.standardizeQuotes) {
-        console.log("At stage 2");
+        console.log('At stage 2');
         standardizeQuotes();
       } else {
-        console.log("Skipping stage 2");
-        setConversionStage(prev => prev + 1);
+        console.log('Skipping stage 2');
+        setConversionStage((prev) => prev + 1);
       }
     }
   }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.standardizeQuotes]);
@@ -318,11 +337,11 @@ export const AppContentProvider = ({ children }) => {
 
       setConvertedTsvRows(newConvertedTsvRows);
       setMergedTsvRows(mergedRows);
-      setConversionStage(prev => prev + 1);
+      setConversionStage((prev) => prev + 1);
     };
 
     if (selectedBranch && conversionStage === 3 && convertedTsvRows.length && !mergedTsvRows.length && checkboxStates.mergeWithDCS) {
-      console.log("At stage 3 - DCS");
+      console.log('At stage 3 - DCS');
       doMerge();
     }
   }, [convertedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows, conversionStage, checkboxStates.mergeWithDCS]);
@@ -331,13 +350,19 @@ export const AppContentProvider = ({ children }) => {
   useEffect(() => {
     const doGLQuoteCols = async () => {
       try {
-        const result = await addGLQuoteCols({bibleLinks: ['unfoldingWord/en_ult/master'], bookCode: selectedBook, tsvContent: convertedTsvRows.join('\n'), trySeparatorsAndOccurrences: true, dcsURL});
+        const result = await addGLQuoteCols({
+          bibleLinks: ['unfoldingWord/en_ult/master'],
+          bookCode: selectedBook,
+          tsvContent: convertedTsvRows.join('\n'),
+          trySeparatorsAndOccurrences: true,
+          dcsURL,
+        });
         if (result.output.length) {
-          setConvertedTsvRows(result.output.split("\n"));
+          setConvertedTsvRows(result.output.split('\n'));
         } else {
           setConversionDone(true);
         }
-        setConversionStage(prev => prev + 1);
+        setConversionStage((prev) => prev + 1);
         if (result.errors.length) {
           setErrors(result.errors);
         }
@@ -348,35 +373,35 @@ export const AppContentProvider = ({ children }) => {
     };
 
     if (doConvert && convertedTsvRows.length && conversionStage === 3 && !conversionDone) {
-      if(checkboxStates.makeGLCols) {
-        console.log("At stage 3 - GL");
+      if (checkboxStates.makeGLCols) {
+        console.log('At stage 3 - GL');
         doGLQuoteCols();
       } else if (!checkboxStates.mergeWithDCS) {
-        console.log("Skipping stage 3");
-        setConversionStage(prev => prev + 1);
+        console.log('Skipping stage 3');
+        setConversionStage((prev) => prev + 1);
       }
     }
   }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.makeGLCols]);
 
   // Conversion Stage 4: Fix curly quotes
   useEffect(() => {
-    if(doConvert && conversionStage === 4 && convertedTsvRows.length) {
-      console.log("At stage 4");
+    if (doConvert && conversionStage === 4 && convertedTsvRows.length) {
+      console.log('At stage 4');
       if (checkboxStates.replaceWithCurlyQuotes) {
         const newRows = [];
-        for(const i in convertedTsvRows) {
+        for (const i in convertedTsvRows) {
           newRows.push(replaceWithCurlyQuotes(convertedTsvRows[i]));
         }
         setConvertedTsvRows(newRows);
         if (mergedTsvRows.length) {
           const newRows = [];
-          for(const i in mergedTsvRows) {
-            newRows.push(replaceWithCurlyQuotes(mergedTsvRows[i]));            
+          for (const i in mergedTsvRows) {
+            newRows.push(replaceWithCurlyQuotes(mergedTsvRows[i]));
           }
           setMergedTsvRows(newRows);
         }
       }
-      setConversionStage(prev => prev + 1);
+      setConversionStage((prev) => prev + 1);
       setConversionDone(true);
     }
   }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.replaceWithCurlyQuotes]);
