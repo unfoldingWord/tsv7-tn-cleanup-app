@@ -46,7 +46,7 @@ function ConverterResultsComponent() {
             {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
           {errors.length ? (
-            <FormControlLabel control={<Checkbox checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} label="Show Errors" />
+            <FormControlLabel control={<Checkbox checked={showErrors} sx={{color: 'red'}} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} sx={{color: 'red'}} label={`Show ${errors.length} Error(s)`} />
           ) : null}
           {showErrors ? (
             <TextField

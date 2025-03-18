@@ -109,18 +109,20 @@ export const AppContentProvider = ({ children }) => {
 
   useEffect(() => {
     setDoConvert(false);
-  }, [selectedBook, inputTsvRows, checkboxStates]);
+  }, [selectedBook, selectedBranch, inputTsvRows, checkboxStates]);
 
   useEffect(() => {
-    setConversionStage(1);
-    setConvertedTsvRows([]);
-    setMergedTsvRows([]);
-    setConversionDone(false);
-    setErrors([]);
-    setShowOnlyConvertedRows(false);
-    setShowOnlyChangedRows(false);
-    setShowNotFound(false);
-    setDoNotPromptAgain(false);
+    if (doConvert) {
+      setConversionStage(1);
+      setConvertedTsvRows([]);
+      setMergedTsvRows([]);
+      setConversionDone(false);
+      setErrors([]);
+      setShowOnlyConvertedRows(false);
+      setShowOnlyChangedRows(false);
+      setShowNotFound(false);
+      setDoNotPromptAgain(false);
+    }
   }, [doConvert]);
 
   // Conversion Stage 1: Convert ULT quotes to OL quotes
