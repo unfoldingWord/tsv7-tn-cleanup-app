@@ -41,11 +41,11 @@ function App() {
             </p>
             <p>
               This may work for other TSV files with a Quote or OrigQuote column, but no guarrantee. If you'd like to ONLY convert GL Quotes to Greek/Hebrew Quotes for other
-              resources, like Study Notes or Translation Questions, visit{' '}
+              resources, like Study Notes or Translation Questions,{' '}
               <a href="https://tsv-quote-converters.netlify.app/" target="_blank" rel="noopener noreferrer">
-                the Styleguidist App here
+                visit the Styleguidist
               </a>{' '}
-              which are the Javascript functions that do the quote conversion.
+              for the Javascript functions used for the quote conversion.
             </p>
           </div>
         </Box>
