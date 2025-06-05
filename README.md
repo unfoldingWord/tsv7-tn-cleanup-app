@@ -1,4 +1,4 @@
-# TSV Quote Converter App
+# TSV TN Cleanup & Quote Converter App
 
 A web application for converting and cleaning up Translation Notes (TN) TSV files, specifically designed to work with Door43 Content Service (DCS) repositories.
 
