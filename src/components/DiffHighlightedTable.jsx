@@ -13,12 +13,13 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
   const inputRowsByID = new Map();
   inputTsvRows.forEach((row) => {
     const cells = row.split('\t');
-    if (cells[1].trim() && cells[0].trim() != 'Reference') {
+    console.log(cells);
+    if (cells?.[1]?.trim() && cells?.[0]?.trim() != 'Reference') {
       const tsvRowLength = tsvRows[0].split('\t').length;
       while (cells.length < tsvRowLength) {
         cells.splice(6, 0, '');
       }
-      inputRowsByID.set(cells[1].trim(), cells);
+      inputRowsByID.set(cells[1].trim() || '', cells);
     }
   });
 
@@ -101,48 +102,47 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
         maxHeight: '500px',
       }}
     >
-
-<TablePagination
-  component="div"
-  count={rows.length}
-  rowsPerPage={rowsPerPage}
-  rowsPerPageOptions={[rowsPerPage]}
-  page={page}
-  onPageChange={handleChangePage}
-  ActionsComponent={(subProps) => {
-    const {
-      page,
-    } = subProps;
-    return (
-      <>
-        {', '}Page: <Select
-          size="small"
-          onChange={(e) => handleChangePage(e, e.target.value)}
-          value={page}
-          MenuProps={{
-            PaperProps: { sx: { maxHeight: 360 } }
-          }}
-          >
-            {[...Array(Math.ceil(rows.length / rowsPerPage)).keys()].map((pageNum) => (
-              <MenuItem key={pageNum} value={pageNum}>
-                {pageNum + 1}
-              </MenuItem>
-            ))}
-         </Select>
-         {' of '}{Math.ceil(rows.length / rowsPerPage)}
-      </>
-    );
-  }}
-  sx={{
-    '& .MuiTablePagination-toolbar': {
-      minHeight: '36px',
-    },
-    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-      marginTop: '0px',
-      marginBottom: '0px',
-    },
-  }}
-/>
+      <TablePagination
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[rowsPerPage]}
+        page={page}
+        onPageChange={handleChangePage}
+        ActionsComponent={(subProps) => {
+          const { page } = subProps;
+          return (
+            <>
+              {', '}Page:{' '}
+              <Select
+                size="small"
+                onChange={(e) => handleChangePage(e, e.target.value)}
+                value={page}
+                MenuProps={{
+                  PaperProps: { sx: { maxHeight: 360 } },
+                }}
+              >
+                {[...Array(Math.ceil(rows.length / rowsPerPage)).keys()].map((pageNum) => (
+                  <MenuItem key={pageNum} value={pageNum}>
+                    {pageNum + 1}
+                  </MenuItem>
+                ))}
+              </Select>
+              {' of '}
+              {Math.ceil(rows.length / rowsPerPage)}
+            </>
+          );
+        }}
+        sx={{
+          '& .MuiTablePagination-toolbar': {
+            minHeight: '36px',
+          },
+          '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+            marginTop: '0px',
+            marginBottom: '0px',
+          },
+        }}
+      />
       <TableContainer sx={{ width: '100%', maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table" sx={{ width: '100%' }}>
           <TableHead>
@@ -158,20 +158,33 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
             {paginatedRows.map((row, rowIdx) => (
               <TableRow hover role="checkbox" tabIndex={-1} key={rowIdx}>
                 {row.cells.map((cell, cellIdx) => (
-                  <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < (row.cells.length - 1) ? 1 : 0, whiteSpace: 'break-spaces' }}>
+                  <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < row.cells.length - 1 ? 1 : 0, whiteSpace: 'break-spaces' }}>
                     <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} disableHoverListener={!cell.tooltip} arrow>
-                      {cellIdx < (row.cells.length - 1) ? 
-                        <span style={{backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit'}}>
+                      {cellIdx < row.cells.length - 1 ? (
+                        <span
+                          style={{
+                            backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit',
+                            color: cell.highlight === 'error' ? 'white' : 'inherit',
+                          }}
+                        >
                           {cell.content}
-                        </span> :
+                        </span>
+                      ) : (
                         <TextareaAutosize
                           minRows={1}
                           maxRows={3}
                           width={400}
-                          style={{ width: 400, resize: 'both', overflow: 'auto', backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit', color: cell.highlight === 'error' ? 'white' : 'inherit' }}
+                          style={{
+                            width: 400,
+                            resize: 'both',
+                            overflow: 'auto',
+                            backgroundColor: cell.highlight === 'difference' ? 'yellow' : cell.highlight === 'error' ? 'red' : 'inherit',
+                            color: cell.highlight === 'error' ? 'white' : 'inherit',
+                          }}
                           value={cell.content}
                           readOnly
-                        />}
+                        />
+                      )}
                     </Tooltip>
                   </TableCell>
                 ))}

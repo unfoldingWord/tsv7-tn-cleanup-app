@@ -9,7 +9,7 @@ function ConverterResultsComponent() {
   const {
     selectedBranch,
     selectedBook,
-    inputTsvRows,
+    inputTsvText,
     convertedTsvRows,
     mergedTsvRows,
     conversionDone,
@@ -33,7 +33,11 @@ function ConverterResultsComponent() {
   };
 
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText((!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows).filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND') || row.includes("Reference\tID")).join('\n'));
+    navigator.clipboard.writeText(
+      (!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows)
+        .filter((row) => !showNotFound || row.includes('QUOTE_NOT_FOUND') || row.includes('Reference\tID'))
+        .join('\n')
+    );
   };
 
   const failedCount = convertedTsvRows.filter((row) => row.includes('QUOTE_NOT_FOUND: ')).length;
@@ -46,7 +50,11 @@ function ConverterResultsComponent() {
             {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
           {errors.length ? (
-            <FormControlLabel control={<Checkbox checked={showErrors} sx={{color: 'red'}} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />} sx={{color: 'red'}} label={`Show ${errors.length} Error(s)`} />
+            <FormControlLabel
+              control={<Checkbox checked={showErrors} sx={{ color: 'red' }} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />}
+              sx={{ color: 'red' }}
+              label={`Show ${errors.length} Error(s)`}
+            />
           ) : null}
           {showErrors ? (
             <TextField
@@ -128,10 +136,12 @@ function ConverterResultsComponent() {
                 ''
               )}
             </div>
-            {checkboxStates.mergeWithDCS && <FormControlLabel
-              control={<Checkbox checked={showOnlyConvertedRows} onChange={handleShowOnlyConvertedRowsCheckboxChange} color="primary" style={{ clear: 'both' }} />}
-              label={'Show only your rows from above'}
-            />}
+            {checkboxStates.mergeWithDCS && (
+              <FormControlLabel
+                control={<Checkbox checked={showOnlyConvertedRows} onChange={handleShowOnlyConvertedRowsCheckboxChange} color="primary" style={{ clear: 'both' }} />}
+                label={'Show only your rows from above'}
+              />
+            )}
             <FormControlLabel
               control={<Checkbox checked={showNotFound} onChange={handleShowOnlyNotFoundCheckboxChange} color="primary" />}
               label="Show only QUOTE_NOT_FOUND rows"
@@ -195,7 +205,11 @@ function ConverterResultsComponent() {
                 ) : null}
               </div>
             </div>
-            <DiffHighlightedTable tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows } inputTsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? convertedTsvRows : inputTsvRows} showNotFound={showNotFound} />
+            <DiffHighlightedTable
+              tsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? mergedTsvRows : convertedTsvRows}
+              inputTsvRows={!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? convertedTsvRows : inputTsvText.split('\n')}
+              showNotFound={showNotFound}
+            />
           </div>
         </Box>
       ) : null}

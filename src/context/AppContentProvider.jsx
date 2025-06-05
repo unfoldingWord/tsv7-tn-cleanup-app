@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import { convertGLQuotes2OLQuotes, addGLQuoteCols } from 'tsv-quote-converters';
 import { BibleBookData } from '../common/books';
+import { TableRows } from '@mui/icons-material';
 
 // Remove the parseTsv helper function as we'll use Papaparse instead
 
@@ -39,6 +40,7 @@ export const AppContentProvider = ({ children }) => {
   const [dcsURL, setDcsURL] = useState(localStorage.getItem('dcsURL') || 'https://git.door43.org');
   const [selectedBranch, setSelectedBranch] = useState(localStorage.getItem('selectedBranch') || 'master');
 
+  const [inputTsvText, setInputTsvText] = useState('');
   const [inputTsvRows, setInputTsvRows] = useState([]);
   const [convertedTsvRows, setConvertedTsvRows] = useState([]);
   const [mergedTsvRows, setMergedTsvRows] = useState([]);
@@ -73,6 +75,24 @@ export const AppContentProvider = ({ children }) => {
   //     document.removeEventListener('paste', handlePaste);
   //   };
   // }, [inputTsvRows]);
+
+  useEffect(() => {
+    if (inputTsvText) {
+      const rows = inputTsvText.split('\n').map((row) =>
+        row
+          .split('\t')
+          .map((cell) => {
+            cell = cell.trim();
+            if (cell.startsWith('"') && cell.endsWith('"')) {
+              cell = cell.substring(1, cell.length - 1).trim();
+            }
+            return cell;
+          })
+          .join('\t')
+      );
+      setInputTsvRows(rows);
+    }
+  }, [inputTsvText]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -128,6 +148,7 @@ export const AppContentProvider = ({ children }) => {
   // Conversion Stage 1: Convert ULT quotes to OL quotes
   useEffect(() => {
     const doUlt2OL = async () => {
+      // make sure all rows are proper
       try {
         if (inputTsvRows[0].split('\t')[0] !== 'Reference') {
           inputTsvRows.unshift('Reference\tID\tTags\tSupportReference\tQuote\tOccurrence\tNote');
@@ -145,7 +166,7 @@ export const AppContentProvider = ({ children }) => {
         } else {
           setConversionDone(true);
         }
-        if (result.errors.length) {
+        if (result?.errors?.length) {
           setErrors(result.errors);
         }
       } catch (error) {
@@ -217,7 +238,7 @@ export const AppContentProvider = ({ children }) => {
         } else {
           setConversionDone(true);
         }
-        setErrors([...result.errors, ...result2.errors]);
+        setErrors([...(result?.errors || []), ...(result2?.errors || [])]);
       } catch (error) {
         setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
         console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
@@ -365,8 +386,8 @@ export const AppContentProvider = ({ children }) => {
           setConversionDone(true);
         }
         setConversionStage((prev) => prev + 1);
-        if (result.errors.length) {
-          setErrors(result.errors);
+        if (result?.errors?.length) {
+          setErrors(result?.errors);
         }
       } catch (error) {
         setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
@@ -441,8 +462,10 @@ export const AppContentProvider = ({ children }) => {
         setSelectedBook,
         selectedBranch,
         setSelectedBranch,
+        inputTsvText,
         inputTsvRows,
         setInputTsvRows,
+        setInputTsvText,
         convertedTsvRows,
         setConvertedTsvRows,
         doConvert,
