@@ -1,5 +1,5 @@
 {
-  "name": "tsv77-tn-cleanup-app",
+  "name": "tsv7-tn-cleanup-app",
   "version": "1.1.8",
   "private": false,
   "type": "module",
@@ -11,12 +11,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unfoldingWord/tsv7-ult-quotes-to-origl-quotes-rcl"
+    "url": "git+https://github.com/unfoldingWord/tsv7-tn-cleanup-app"
   },
   "bugs": {
-    "url": "https://github.com/unfoldingWord/tsv7-ult-quotes-to-origl-quotes-rcl/issues"
+    "url": "https://github.com/unfoldingWord/tsv7-tn-cleanup-app/issues"
   },
-  "homepage": "https://github.com/unfoldingWord/tsv7-ult-quotes-to-origl-quotes-rcl#readme",
+  "homepage": "https://github.com/unfoldingWord/tsv7-tn-cleanup-app#readme",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
