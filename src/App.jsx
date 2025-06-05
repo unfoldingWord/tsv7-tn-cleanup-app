@@ -29,8 +29,9 @@ function App() {
         <Box sx={{ padding: 2 }}>
           <div>
             <p>
-              This app is designed to help you clean up TSV files for Translation Notes. It allows you to upload a TSV file, select the Bible book and branch, and then process the
-              file to remove unwanted lines and ensure proper formatting.
+              This app is designed to help you clean up TSV files for Translation Notes. It allows you to paste or upload a TSV file, or select the Bible book and branch and
+              download the text from DCS, and then process the file to remove unwanted lines and ensure proper formatting. You must select a Bible book for this to know which Bible
+              it is working with, and if you want to merge with the DCS existing text, you must select a branch.
             </p>
             <p>
               For more information, view the{' '}
