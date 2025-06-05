@@ -59,7 +59,7 @@ The converted results are shown in a paginated table with filtering options:
 ## Technical Details
 
 - Built with React and Material-UI
-- Uses the `tsv-quote-converters` library for quote conversion
+- Uses the [`tsv-quote-converters`](https://github.com/unfoldingWord/tsv-quote-converters) library for quote conversion
 - Integrates with Door43 Content Service (DCS) API
 - Deployed on Netlify
 
