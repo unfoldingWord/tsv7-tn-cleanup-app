@@ -241,7 +241,7 @@ function TSVUploadWidget() {
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2, marginBottom: 1 }}>
         <TextField
           id="chapterRange"
-          label="Chapters:"
+          label="Chapters"
           variant="outlined"
           value={chapterRangeInput}
           onChange={(e) => {
