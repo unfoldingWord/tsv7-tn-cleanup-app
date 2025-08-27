@@ -1,7 +1,8 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { AppContentContext } from '../context/AppContentProvider';
+import { chaptersInBook } from '../common/books';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
@@ -22,6 +23,9 @@ function TSVUploadWidget() {
     checkboxStates,
   } = useContext(AppContentContext);
   const fileInputRef = useRef(null);
+  const [chapterRangeInput, setChapterRangeInput] = useState('');
+  const [chapterRangeError, setChapterRangeError] = useState('');
+  const [chapterRangeBounds, setChapterRangeBounds] = useState(null); // [start, end] or null
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -35,6 +39,92 @@ function TSVUploadWidget() {
       reader.readAsText(file);
     }
   };
+
+  const filterTsvByChapter = (text, start, end) => {
+    if (!text) return '';
+    const lines = text.split(/\r?\n/);
+    const out = [];
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const firstCol = (line.split('\t')[0] || '').trim();
+      // Keep header row that begins with "Reference"
+      if (firstCol.toLowerCase().startsWith('reference')) {
+        out.push(line);
+        continue;
+      }
+      const chapPart = firstCol.split(':')[0].trim();
+      const chapNum = parseInt(chapPart, 10);
+      if (!Number.isNaN(chapNum) && chapNum >= start && chapNum <= end) {
+        out.push(line);
+      }
+    }
+    return out.join('\n');
+  };
+
+  const validateChapterRange = (input) => {
+    if (!input || !input.toString().trim()) return { valid: true, bounds: null };
+    const single = /^\s*(\d+)\s*$/;
+    const range = /^\s*(\d+)\s*-\s*(\d+)\s*$/;
+    let m;
+    const max = (() => {
+      try {
+        return chaptersInBook(selectedBook).length;
+      } catch (err) {
+        return Infinity;
+      }
+    })();
+    if ((m = input.match(single))) {
+      const n = parseInt(m[1], 10);
+      if (n < 1 || n > max) return { valid: false, error: `Chapter must be between 1 and ${max}` };
+      return { valid: true, bounds: [n, n] };
+    }
+    if ((m = input.match(range))) {
+      const a = parseInt(m[1], 10);
+      const b = parseInt(m[2], 10);
+      if (a < 1 || b < 1 || a > max || b > max) return { valid: false, error: `Chapters must be between 1 and ${max}` };
+      if (a > b) return { valid: false, error: 'Start chapter must be less than or equal to end chapter' };
+      return { valid: true, bounds: [a, b] };
+    }
+    return { valid: false, error: 'Enter a number or a range like 2 or 2-5 (optional, if blank all chapters used)' };
+  };
+
+  const handleChaptersBlur = () => {
+    const { valid, bounds, error } = validateChapterRange(chapterRangeInput);
+    if (!valid) {
+      setChapterRangeError(error);
+      setChapterRangeBounds(null);
+      return;
+    }
+    setChapterRangeError('');
+    setChapterRangeBounds(bounds);
+    if (bounds) {
+      const filtered = filterTsvByChapter(inputTsvText, bounds[0], bounds[1]);
+      if (filtered !== inputTsvText) {
+        setInputTsvRows([]);
+        setInputTsvText(filtered);
+        const el = document.getElementById('inputTsv');
+        if (el) el.value = filtered;
+      }
+    }
+  };
+
+  useEffect(() => {
+    // When inputTsvText or chapter bounds change, ensure rows and text reflect the chapter filter
+    if (!chapterRangeBounds) {
+      const rows = inputTsvText ? inputTsvText.split(/\r?\n/).filter((l) => l.trim()) : [];
+      setInputTsvRows(rows);
+      return;
+    }
+    const [start, end] = chapterRangeBounds;
+    const filtered = filterTsvByChapter(inputTsvText, start, end);
+    const rows = filtered ? filtered.split(/\r?\n/).filter((l) => l.trim()) : [];
+    setInputTsvRows(rows);
+    if (filtered !== inputTsvText) {
+      setInputTsvText(filtered);
+      const el = document.getElementById('inputTsv');
+      if (el) el.value = filtered;
+    }
+  }, [inputTsvText, chapterRangeBounds, selectedBook]);
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -147,6 +237,23 @@ function TSVUploadWidget() {
           },
         }}
       />
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2, marginBottom: 1 }}>
+        <TextField
+          id="chapterRange"
+          label="Chapters:"
+          variant="outlined"
+          value={chapterRangeInput}
+          onChange={(e) => {
+            setChapterRangeInput(e.target.value);
+            setChapterRangeError('');
+          }}
+          onBlur={handleChaptersBlur}
+          error={!!chapterRangeError}
+          helperText={chapterRangeError || 'Enter a number or range like 2 or 2-5 (optional, if blank all chapters used)'}
+          sx={{ width: '500px' }}
+        />
+      </Box>
 
       <FormGroup sx={{ padding: 2 }}>
         <FormControlLabel
