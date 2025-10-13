@@ -395,7 +395,7 @@ export const AppContentProvider = ({ children }) => {
       }
     };
 
-    if (doConvert && convertedTsvRows.length && conversionStage === 3 && !conversionDone) {
+    if (doConvert && convertedTsvRows.length && conversionStage === 3) {
       if (checkboxStates.makeGLCols) {
         console.log('At stage 3 - GL');
         doGLQuoteCols();
