@@ -160,7 +160,7 @@ function ConverterResultsComponent() {
                 justifyContent: 'space-between',
               }}
             >
-              <span style={{ marginLeft: '8px', fontWeight: 'bold' }}>Converted Rows{!showOnlyConvertedRows ? ' Merged with DCS file' : ''}:</span>
+              <span style={{ marginLeft: '8px', fontWeight: 'bold' }}>Converted Rows:</span>
               <div>
                 <IconButton
                   component="a"
