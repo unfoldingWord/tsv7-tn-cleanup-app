@@ -170,8 +170,19 @@ export const AppContentProvider = ({ children }) => {
           setErrors(result.errors);
         }
       } catch (error) {
-        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
-        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
+        const errStr = error && error.message ? error.message : String(error);
+        const match = errStr.match(/on line\s*(\d+)/i);
+        let idx;
+        if (match && match[1]) {
+          idx = parseInt(match[1], 10);
+        }
+        if (typeof idx === 'undefined') {
+          idx = Math.max(0, convertedTsvRows.length - 1);
+        }
+        console.log(match, idx, inputTsvRows[idx]);
+        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
+        setErrors([`Error processing row #${idx + 1}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx + 1}:`, error);
         setConversionDone(true);
       }
     };
@@ -240,8 +251,20 @@ export const AppContentProvider = ({ children }) => {
         }
         setErrors([...(result?.errors || []), ...(result2?.errors || [])]);
       } catch (error) {
-        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
-        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
+        const errStr = error && error.message ? error.message : String(error);
+        const match = errStr.match(/on line\s*(\d+)/i);
+        let idx;
+        if (match && match[1]) {
+          idx = parseInt(match[1], 10);
+        }
+        console.log(match, idx);
+        if (typeof idx === 'undefined') {
+          idx = Math.max(0, convertedTsvRows.length - 1);
+        }
+        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
+        setErrors([`Error processing 2 row #${idx + 1}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx + 1}:`, error);
+        setConversionDone(true);
       }
     };
 
@@ -390,8 +413,21 @@ export const AppContentProvider = ({ children }) => {
           setErrors(result?.errors);
         }
       } catch (error) {
-        setErrors([`Error processing row #${convertedTsvRows.length + 1}: ${error}`]);
-        console.error(`Error processing row #${convertedTsvRows.length + 1}:`, error);
+        const errStr = error && error.message ? error.message : String(error);
+        const match = errStr.match(/on line\s*(\d+)/i);
+        let idx;
+        if (match && match[1]) {
+          idx = parseInt(match[1], 10);
+        }
+        console.log(match, idx);
+        if (typeof idx === 'undefined') {
+          idx = Math.max(0, convertedTsvRows.length - 1);
+        }
+        console.log(inputTsvRows);
+        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
+        setErrors([`Error processing row #${idx + 1}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx + 1}:`, error);
+        setConversionDone(true);
       }
     };
 
