@@ -180,9 +180,9 @@ export const AppContentProvider = ({ children }) => {
           idx = Math.max(0, convertedTsvRows.length - 1);
         }
         console.log(match, idx, inputTsvRows[idx]);
-        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
-        setErrors([`Error processing row #${idx + 1}: ${errStr}: ${context}...`]);
-        console.error(`Error processing row #${idx + 1}:`, error);
+        const context = inputTsvRows[idx - 1] ? inputTsvRows[idx - 1].substring(0, 20) : '';
+        setErrors([`Error processing row #${idx}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx}:`, error);
         setConversionDone(true);
       }
     };
@@ -261,9 +261,9 @@ export const AppContentProvider = ({ children }) => {
         if (typeof idx === 'undefined') {
           idx = Math.max(0, convertedTsvRows.length - 1);
         }
-        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
-        setErrors([`Error processing 2 row #${idx + 1}: ${errStr}: ${context}...`]);
-        console.error(`Error processing row #${idx + 1}:`, error);
+        const context = inputTsvRows[idx - 1] ? inputTsvRows[idx - 1].substring(0, 20) : '';
+        setErrors([`Error processing row #${idx}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx}:`, error);
         setConversionDone(true);
       }
     };
@@ -424,9 +424,9 @@ export const AppContentProvider = ({ children }) => {
           idx = Math.max(0, convertedTsvRows.length - 1);
         }
         console.log(inputTsvRows);
-        const context = inputTsvRows[idx] ? inputTsvRows[idx].substring(0, 20) : '';
-        setErrors([`Error processing row #${idx + 1}: ${errStr}: ${context}...`]);
-        console.error(`Error processing row #${idx + 1}:`, error);
+        const context = inputTsvRows[idx - 1] ? inputTsvRows[idx - 1].substring(0, 20) : '';
+        setErrors([`Error processing row #${idx}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx}:`, error);
         setConversionDone(true);
       }
     };
