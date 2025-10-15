@@ -158,7 +158,7 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
           <TableBody>
             {paginatedRows.map((row, rowIdx) => (
               <TableRow hover role="checkbox" tabIndex={-1} key={rowIdx}>
-                <TableCell key="line-num">{page * rowsPerPage + rowIdx + 1}</TableCell>
+                <TableCell key="line-num">{page * rowsPerPage + rowIdx + 2}</TableCell>
                 {row.cells.map((cell, cellIdx) => (
                   <TableCell key={cellIdx} align="left" sx={{ minWidth: 50, padding: cellIdx < row.cells.length - 1 ? 1 : 0, whiteSpace: 'break-spaces' }}>
                     <Tooltip title={<span style={{ whiteSpace: 'pre-line' }}>{cell.tooltip}</span>} disableHoverListener={!cell.tooltip} arrow>
