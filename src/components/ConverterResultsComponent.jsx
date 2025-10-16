@@ -13,12 +13,10 @@ function ConverterResultsComponent() {
     convertedTsvRows,
     mergedTsvRows,
     conversionDone,
-    errors,
     showOnlyConvertedRows,
     setShowOnlyConvertedRows,
     dcsURL,
-    setShowErrors,
-    showErrors,
+    conversionStage,
     setShowNotFound,
     showNotFound,
     checkboxStates,
@@ -44,48 +42,11 @@ function ConverterResultsComponent() {
 
   return (
     <>
-      {conversionDone ? (
+      {conversionDone && conversionStage === 5 ? (
         <Box sx={{ marginY: 2, padding: 1 }}>
           <div>
             {convertedTsvRows.length} rows processed{failedCount > 0 ? `, failed to find ${failedCount} quote${failedCount > 1 ? 's' : ''}.` : ''}
           </div>
-          {errors.length ? (
-            <FormControlLabel
-              control={<Checkbox checked={showErrors} sx={{ color: 'red' }} onChange={(e) => setShowErrors(e.target.checked)} color="primary" />}
-              sx={{ color: 'red' }}
-              label={`Show ${errors.length} Error(s)`}
-            />
-          ) : null}
-          {showErrors ? (
-            <TextField
-              label="Errors"
-              multiline
-              rows={4}
-              variant="outlined"
-              fullWidth
-              value={errors.join('\n')}
-              sx={{
-                marginTop: 2,
-                resize: 'both',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'red',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'red',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'red',
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  whiteSpace: 'nowrap',
-                  overflowX: 'auto',
-                  resize: 'both',
-                },
-              }}
-            />
-          ) : null}
           <div style={{ clear: 'both', position: 'relative' }}>
             <div id="copy-info" style={{ float: 'left' }}>
               {!showOnlyConvertedRows && checkboxStates.mergeWithDCS ? (

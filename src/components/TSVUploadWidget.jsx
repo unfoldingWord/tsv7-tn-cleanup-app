@@ -19,6 +19,9 @@ function TSVUploadWidget() {
     doConvert,
     setDoConvert,
     dcsURL,
+    errors,
+    showErrors,
+    setShowErrors,
     conversionDone,
     checkboxStates,
   } = useContext(AppContentContext);
@@ -311,6 +314,39 @@ function TSVUploadWidget() {
           </>
         ) : null}
       </Button>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2, marginBottom: 1 }}>
+        {errors.length ? (
+          <TextField
+            label="Errors"
+            multiline
+            rows={4}
+            variant="outlined"
+            fullWidth
+            value={errors.join('\n')}
+            sx={{
+              marginTop: 2,
+              resize: 'both',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'red',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'red',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'red',
+                },
+              },
+              '& .MuiInputBase-input': {
+                whiteSpace: 'nowrap',
+                overflowX: 'auto',
+                resize: 'both',
+              },
+            }}
+          />
+        ) : null}
+      </Box>
     </Box>
   );
 }

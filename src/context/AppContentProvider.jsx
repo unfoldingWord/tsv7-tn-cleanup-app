@@ -159,11 +159,13 @@ export const AppContentProvider = ({ children }) => {
         setConversionStage(0);
         setConversionDone(true);
         setDoConvert(false);
+        setShowErrors(true);
         console.log('RETURNING!!!');
         return;
       }
 
       setErrors([]);
+      setShowErrors(false);
       setConversionDone(false);
       setConversionStage(1);
     }
@@ -292,7 +294,7 @@ export const AppContentProvider = ({ children }) => {
       }
     };
 
-    if (doConvert && conversionStage === 2 && convertedTsvRows.length && errors.length === 0) {
+    if (doConvert && conversionStage === 2 && convertedTsvRows.length) {
       if (checkboxStates.standardizeQuotes) {
         console.log('At stage 2');
         standardizeQuotes();
@@ -301,7 +303,7 @@ export const AppContentProvider = ({ children }) => {
         setConversionStage((prev) => prev + 1);
       }
     }
-  }, [errors, doConvert, convertedTsvRows, conversionStage, checkboxStates.standardizeQuotes]);
+  }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.standardizeQuotes]);
 
   // Conversion Stage 3: Merge with DCS
   useEffect(() => {
@@ -410,11 +412,11 @@ export const AppContentProvider = ({ children }) => {
       setConversionStage((prev) => prev + 1);
     };
 
-    if (selectedBranch && conversionStage === 3 && convertedTsvRows.length && !mergedTsvRows.length && checkboxStates.mergeWithDCS && errors.length === 0) {
+    if (selectedBranch && conversionStage === 3 && convertedTsvRows.length && !mergedTsvRows.length && checkboxStates.mergeWithDCS) {
       console.log('At stage 3 - DCS');
       doMerge();
     }
-  }, [errors, convertedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows, conversionStage, checkboxStates.mergeWithDCS]);
+  }, [convertedTsvRows, dcsURL, selectedBranch, selectedBook, mergedTsvRows, conversionStage, checkboxStates.mergeWithDCS]);
 
   // Conversion Stage 3: Add GL Quotes and Occurrences
   useEffect(() => {
@@ -455,7 +457,7 @@ export const AppContentProvider = ({ children }) => {
       }
     };
 
-    if (doConvert && convertedTsvRows.length && conversionStage === 3 && errors.length === 0) {
+    if (doConvert && convertedTsvRows.length && conversionStage === 3) {
       if (checkboxStates.makeGLCols) {
         console.log('At stage 3 - GL');
         doGLQuoteCols();
@@ -464,11 +466,11 @@ export const AppContentProvider = ({ children }) => {
         setConversionStage((prev) => prev + 1);
       }
     }
-  }, [errors, doConvert, convertedTsvRows, conversionStage, checkboxStates.makeGLCols]);
+  }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.makeGLCols]);
 
   // Conversion Stage 4: Fix curly quotes
   useEffect(() => {
-    if (doConvert && conversionStage === 4 && convertedTsvRows.length && errors.length === 0 && !conversionDone) {
+    if (doConvert && conversionStage === 4 && convertedTsvRows.length && !conversionDone) {
       console.log('At stage 4');
       if (checkboxStates.replaceWithCurlyQuotes) {
         const newRows = [];
@@ -484,14 +486,15 @@ export const AppContentProvider = ({ children }) => {
           setMergedTsvRows(newRows);
         }
       }
+      console.log('DONE');
       setConversionStage((prev) => prev + 1);
       setConversionDone(true);
     }
-  }, [errors, doConvert, convertedTsvRows, conversionStage, checkboxStates.replaceWithCurlyQuotes]);
+  }, [doConvert, convertedTsvRows, conversionStage, checkboxStates.replaceWithCurlyQuotes]);
 
   // Finishing up by popping up a model if mergeTsvRows has content
   useEffect(() => {
-    if (mergedTsvRows.length > 0 && !doNotPromptAgain && conversionDone && errors.length === 0) {
+    if (mergedTsvRows.length > 0 && !doNotPromptAgain && conversionDone) {
       setDoNotPromptAgain(true);
       const userConfirmed = window.confirm(
         `Do you want to copy the converted & merged content to your clipboard and paste it into the editor for tn_${selectedBook.toUpperCase()}.tsv on DCS?${
@@ -511,7 +514,7 @@ export const AppContentProvider = ({ children }) => {
           });
       }
     }
-  }, [errors, mergedTsvRows, selectedBook, dcsURL, selectedBranch, conversionDone]);
+  }, [mergedTsvRows, selectedBook, dcsURL, selectedBranch, conversionDone]);
 
   return (
     <AppContentContext.Provider
@@ -545,6 +548,7 @@ export const AppContentProvider = ({ children }) => {
         setShowErrors,
         checkboxStates,
         setCheckboxStates,
+        conversionStage,
       }}
     >
       {children}
