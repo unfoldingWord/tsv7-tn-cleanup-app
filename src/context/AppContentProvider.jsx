@@ -148,7 +148,7 @@ export const AppContentProvider = ({ children }) => {
         const row = inputTsvRows[idx];
         const cols = row.split('\t');
         if (cols.length !== 7) {
-          validationErrors.push(`Error: row #${idx + 1} is malformed. There are ${cols.length} columns instead of 7 in line ${idx + 1}: ${inputTsvRows[idx].substr(0, 80)}...`);
+          validationErrors.push(`Error: Row #${idx + 1} is malformed. There are ${cols.length} columns instead of 7 in line ${idx + 1}: ${inputTsvRows[idx].substr(0, 80)}...`);
         }
       }
 
@@ -288,8 +288,8 @@ export const AppContentProvider = ({ children }) => {
           idx = Math.max(0, convertedTsvRows.length - 1);
         }
         const context = inputTsvRows[idx - 1] ? inputTsvRows[idx - 1].substring(0, 80) : '';
-        setErrors([`Error processing 1 row #${idx}: ${errStr}: ${context}...`]);
-        console.error(`Error processing 1 row #${idx}:`, error);
+        setErrors([`Error processing row #${idx}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx}:`, error);
         setConversionDone(true);
       }
     };
@@ -451,8 +451,8 @@ export const AppContentProvider = ({ children }) => {
         }
         console.log(inputTsvRows);
         const context = inputTsvRows[idx - 1] ? inputTsvRows[idx - 1].substring(0, 80) : '';
-        setErrors([`Error processing 2 row #${idx}: ${errStr}: ${context}...`]);
-        console.error(`Error processing 2 row #${idx}:`, error);
+        setErrors([`Error processing row #${idx}: ${errStr}: ${context}...`]);
+        console.error(`Error processing row #${idx}:`, error);
         setConversionDone(true);
       }
     };
