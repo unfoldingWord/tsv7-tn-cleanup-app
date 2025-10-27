@@ -1,11 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Papa from 'papaparse';
 import { convertGLQuotes2OLQuotes, addGLQuoteCols } from 'tsv-quote-converters';
 import { BibleBookData } from '../common/books';
-import { TableRows } from '@mui/icons-material';
-
-// Remove the parseTsv helper function as we'll use Papaparse instead
 
 const replaceWithCurlyQuotes = (row) => {
   if (!row.trim()) {
@@ -241,27 +237,34 @@ export const AppContentProvider = ({ children }) => {
           dcsURL,
         });
         let result2;
+        console.log('addGLQuoteCols output:', result.output);
         if (result.output.length) {
-          let tsvRecords = Papa.parse(result.output, {
-            header: true,
-            delimiter: '\t',
-            quotes: '',
-            skipEmptyLines: true,
-          }).data;
+          let tsvRecords = result.output.split('\n').map((row) => {
+            const cols = row.split('\t');
+            return cols;
+          });
+
+          const headers = tsvRecords[0];
+          tsvRecords = tsvRecords
+            .slice(1)
+            .map((cols) => {
+              const record = {};
+              headers.forEach((header, index) => {
+                record[header] = cols[index] || '';
+              });
+              return record;
+            })
+            .filter((record) => Object.values(record).some((val) => val.trim()));
+
+          console.log(tsvRecords);
 
           tsvRecords.forEach((rec) => {
             rec['Quote'] = rec['GLQuote'];
             rec['Occurrence'] = rec['GLOccurrence'];
           });
 
-          const outputTsv = Papa.unparse(tsvRecords, {
-            delimiter: '\t',
-            header: true,
-            quotes: '',
-            newline: '\n',
-            columns: convertedTsvRows[0].split('\t'),
-          });
-
+          const newHeaders = headers.filter((header) => header !== 'GLQuote' && header !== 'GLOccurrence');
+          const outputTsv = newHeaders.join('\t') + '\n' + tsvRecords.map((rec) => newHeaders.map((header) => rec[header] || '').join('\t')).join('\n');
           console.log('outputTsv', outputTsv);
 
           let result2 = await convertGLQuotes2OLQuotes({ bibleLink: 'unfoldingWord/en_ult/master', bookCode: selectedBook, tsvContent: outputTsv, dcsURL });
