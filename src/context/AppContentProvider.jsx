@@ -332,10 +332,10 @@ export const AppContentProvider = ({ children }) => {
         if (columns.length < 2 || columns[0] === 'Reference') return;
         const [ref, id] = columns;
         if (ref === 'Reference') return;
-        if (!allTsvMap.has(ref)) {
-          allTsvMap.set(ref, []);
+        if (!allTsvMap.has(ref.split(':')[0])) {
+          allTsvMap.set(ref.split(':')[0], []);
         }
-        allTsvMap.get(ref).push(row);
+        allTsvMap.get(ref.split(':')[0]).push(row);
         idToRefMap.set(id, ref);
       });
 
@@ -347,17 +347,17 @@ export const AppContentProvider = ({ children }) => {
         const columns = row.split('\t');
         if (columns.length < 2 || columns[0] === 'Reference') return;
         let [ref, id] = columns;
-        if (!convertedRefs.has(ref)) {
-          allTsvMap.set(ref, []);
-          convertedRefs.add(ref);
+        if (!convertedRefs.has(ref.split(':')[0])) {
+          allTsvMap.set(ref.split(':')[0], []);
+          convertedRefs.add(ref.split(':')[0]);
         }
         if ((!idToRefMap.has(id) || idToRefMap.get(id) === ref) && !id.match(/^\d/) && !convertedTsvIDs.has(id)) {
-          allTsvMap.get(ref).push(row);
+          allTsvMap.get(ref.split(':')[0]).push(row);
         } else {
           const ids = new Set([...idToRefMap.keys(), ...convertedTsvIDs]);
           id = getUniqueID(ids);
           const newRow = [ref, id, ...columns.slice(2)].join('\t');
-          allTsvMap.get(ref).push(newRow);
+          allTsvMap.get(ref.split(':')[0] ).push(newRow);
         }
         convertedTsvIDs.add(id);
         newConvertedTsvRows.push([ref, id, ...columns.slice(2)].join('\t'));
