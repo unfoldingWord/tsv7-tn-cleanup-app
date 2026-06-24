@@ -76,19 +76,6 @@ const DiffHighlightedTable = ({ inputTsvRows, tsvRows, showNotFound }) => {
 
   const paginatedRows = rows.slice(1).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-  const handlePageInputChange = (event) => {
-    const newPage = parseInt(event.target.value, 10) - 1;
-    if (!isNaN(newPage) && newPage >= 0 && newPage < Math.ceil(rows.length / rowsPerPage)) {
-      setPage(newPage);
-    }
-  };
-
-  const handlePageInputKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      handlePageInputChange(event);
-    }
-  };
-
   return (
     <Paper
       sx={{

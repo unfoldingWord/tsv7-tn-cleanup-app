@@ -20,8 +20,6 @@ function TSVUploadWidget() {
     setDoConvert,
     dcsURL,
     errors,
-    showErrors,
-    setShowErrors,
     conversionDone,
     checkboxStates,
   } = useContext(AppContentContext);
@@ -72,7 +70,7 @@ function TSVUploadWidget() {
     const max = (() => {
       try {
         return chaptersInBook(selectedBook).length;
-      } catch (err) {
+      } catch {
         return Infinity;
       }
     })();

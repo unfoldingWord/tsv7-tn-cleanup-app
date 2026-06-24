@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { TextField, Checkbox, FormControlLabel, IconButton, Box } from '@mui/material';
+import { Checkbox, FormControlLabel, IconButton, Box } from '@mui/material';
 import { AppContentContext } from '../context/AppContentProvider';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';

@@ -36,12 +36,12 @@ function App() {
             <p>
               For more information, view the{' '}
               <a href="https://github.com/unfoldingWord/tsv7-tn-cleanup-app#readme" target="_blank" rel="noopener noreferrer">
-                GitHub repository's README
+                GitHub repository&apos;s README
               </a>
               .
             </p>
             <p>
-              This may work for other TSV files with a Quote or OrigQuote column, but no guarrantee. If you'd like to ONLY convert GL Quotes to Greek/Hebrew Quotes for other
+              This may work for other TSV files with a Quote or OrigQuote column, but no guarrantee. If you&apos;d like to ONLY convert GL Quotes to Greek/Hebrew Quotes for other
               resources, like Study Notes or Translation Questions,{' '}
               <a href="https://tsv-quote-converters.netlify.app/" target="_blank" rel="noopener noreferrer">
                 visit the functional demo web form

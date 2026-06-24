@@ -117,7 +117,7 @@ export const isExtraBookID = (bookId) => {
 
 export const usfmNumberName = (bookId) => {
   try {return BibleBookData[bookId.toLowerCase()].usfm;}
-  catch(err) {throw new Error(`usfmNumberName() given invalid bookId: '${bookId}'`);}
+  catch {throw new Error(`usfmNumberName() given invalid bookId: '${bookId}'`);}
 }
 
 export const chaptersInBook = (bookId) => {
@@ -125,7 +125,7 @@ export const chaptersInBook = (bookId) => {
   let chapters;
   try {
     chapters = BibleBookData[bookId.toLowerCase()].chapters;
-  } catch (err) {
+  } catch {
     throw new Error(`chaptersInBook() given invalid bookId: '${bookId}'`);
   }
   if (chapters === undefined) {
