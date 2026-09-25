@@ -31,7 +31,7 @@
     "prop-types": "^15.8.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "tsv-quote-converters": "^1.1.21"
+    "tsv-quote-converters": "^1.1.24"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
